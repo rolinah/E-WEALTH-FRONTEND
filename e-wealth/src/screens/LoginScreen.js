@@ -6,7 +6,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/login-illustration.png')} style={styles.illustration} />
+      <Image source={require('../assets/images/login-illustration.png')} style={styles.illustration} />
       <Text style={styles.tagline}>Welcome back! Continue your journey.</Text>
       <Text style={styles.title}>Login</Text>
       <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" />
@@ -17,7 +17,7 @@ export default function LoginScreen() {
       <Text style={styles.link}>Forgot Password?</Text>
       <Text style={styles.sectionTitle}>How to use the app</Text>
       <Video
-        source={require('../../assets/videos/login-intro.mp4')}
+        source={require('../assets/videos/login-intro.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"

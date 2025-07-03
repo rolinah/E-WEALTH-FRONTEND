@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Video } from 'expo-av';
+import { api } from '../services/api';
 
 const defaultImage = { uri: 'https://placehold.co/200x200/png' };
 const contentCards = [
@@ -11,8 +12,34 @@ const contentCards = [
 
 export default function HomeScreen() {
   const [bannerError, setBannerError] = useState(false);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    api.getDashboard()
+      .then(data => {
+        setDashboard(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to load dashboard');
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <ScrollView style={styles.container}>
+      {loading && <ActivityIndicator size="large" color="#4F8CFF" style={{ marginTop: 20 }} />}
+      {error && <Text style={{ color: 'red', margin: 12 }}>{error}</Text>}
+      {dashboard && (
+        <View style={styles.dashboardStats}>
+          <Text style={styles.dashboardTitle}>Your Stats</Text>
+          <Text>Modules Completed: {dashboard.modulesCompleted}</Text>
+          <Text>Quiz Score: {dashboard.quizScore}</Text>
+          <Text>Current Streak: {dashboard.streak} days</Text>
+        </View>
+      )}
       <Image 
         source={bannerError ? defaultImage : { uri: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca' }}
         style={styles.banner}
@@ -58,4 +85,6 @@ const styles = StyleSheet.create({
   cardText: { flex: 1 },
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#222' },
   cardDesc: { fontSize: 14, color: '#666' },
+  dashboardStats: { margin: 12 },
+  dashboardTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
 });

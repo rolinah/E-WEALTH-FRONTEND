@@ -1,1 +1,62 @@
-node_modules
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Expo/React Native
+.expo/
+.expo-shared/
+dist/
+build/
+web-build/
+
+# Environment variables
+.env
+.env.*
+
+# Metro/Expo cache
+.cache/
+
+# Misc
+*.log
+*.lock
+
+# VSCode
+.vscode/
+
+# Android/iOS build
+android/
+ios/
+
+# Asset outputs
+*.apk
+*.ipa
+
+# Test coverage
+coverage/
+
+# Mac system files
+*.swp
+
+# Others
+.idea/
+*.iml
+
+# Ignore asset outputs
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.svg

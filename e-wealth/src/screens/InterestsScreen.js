@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { Video } from 'expo-av';
 
 const interests = [
-  { name: 'Business', icon: require('../../assets/images/business-icon.png'), desc: 'Grow your business skills' },
-  { name: 'Sales', icon: require('../../assets/images/sales-icon.png'), desc: 'Master the art of selling' },
-  { name: 'Management', icon: require('../../assets/images/management-icon.png'), desc: 'Lead teams to success' },
-  { name: 'Logistics', icon: require('../../assets/images/logistics-icon.png'), desc: 'Optimize supply chains' },
+  { name: 'Business', icon: require('../assets/images/icon.png'), desc: 'Grow your business skills' },
+  { name: 'Sales', icon: require('../assets/images/icon.png'), desc: 'Master the art of selling' },
+  { name: 'Management', icon: require('../assets/images/icon.png'), desc: 'Lead teams to success' },
+  { name: 'Logistics', icon: require('../assets/images/icon.png'), desc: 'Optimize supply chains' },
 ];
 
 export default function InterestsScreen() {
@@ -25,7 +25,7 @@ export default function InterestsScreen() {
       ))}
       <Text style={styles.sectionTitle}>Why choosing your interests matters</Text>
       <Video
-        source={require('../../assets/videos/interests-intro.mp4')}
+        source={require('../assets/videos/community-welcome.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"

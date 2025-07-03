@@ -1,28 +1,43 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Video } from 'expo-av';
+import { api } from '../services/api';
 
-const communityChats = [
-  { user: 'Alice', avatar: require('../assets/images/icon.png'), message: 'Welcome to the community!' },
-  { user: 'Bob', avatar: require('../assets/images/favicon.png'), message: 'Excited to learn together.' },
-  { user: 'Carol', avatar: require('../assets/images/icon.png'), message: 'Let\'s share our progress!' },
-];
+const defaultAvatar = require('../assets/images/icon.png');
 
 export default function CommunityScreen() {
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    api.getCommunity()
+      .then(data => {
+        setChats(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to load community feed');
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Community</Text>
       <Text style={styles.sectionTitle}>Featured Video</Text>
       <Video
-        source={require('../../assets/videos/community-welcome.mp4')}
+        source={require('../assets/videos/community-welcome.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"
       />
       <Text style={styles.sectionTitle}>Chats</Text>
-      {communityChats.map((chat, idx) => (
+      {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />}
+      {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
+      {chats.map((chat, idx) => (
         <View key={idx} style={styles.chatRow}>
-          <Image source={chat.avatar} style={styles.avatar} />
+          <Image source={chat.avatar ? { uri: chat.avatar } : defaultAvatar} style={styles.avatar} />
           <View style={styles.chatBubble}>
             <Text style={styles.userName}>{chat.user}</Text>
             <Text style={styles.message}>{chat.message}</Text>

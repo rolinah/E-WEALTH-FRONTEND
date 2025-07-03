@@ -1,29 +1,45 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Video } from 'expo-av';
+import { api } from '../services/api';
 
-const topics = [
-  { name: 'Sales Topic', progress: 80, streak: 5, badge: require('../../assets/images/badge-streak.png'), desc: 'Introduction to Sales' },
-  { name: 'Management Topic', progress: 60, streak: 3, badge: require('../../assets/images/badge-streak.png'), desc: 'How to manage teams' },
-];
+const badgeDefault = require('../assets/images/badge-streak.png');
 
 export default function TopicsDashboardScreen() {
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    api.getTopics()
+      .then(data => {
+        setTopics(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to load topics');
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Topics Dashboard</Text>
+      {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 40 }} />}
+      {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
       {topics.map((topic, idx) => (
         <View key={idx} style={styles.card}>
-          <Image source={topic.badge} style={styles.badge} />
+          <Image source={badgeDefault} style={styles.badge} />
           <View style={styles.cardText}>
             <Text style={styles.cardTitle}>{topic.name}</Text>
             <Text style={styles.cardDesc}>{topic.desc}</Text>
-            <Text style={styles.progressText}>Progress: {topic.progress}% | Streak: {topic.streak} days</Text>
+            <Text style={styles.progressText}>Progress: {topic.progress || 0}% | Streak: {topic.streak || 0} days</Text>
           </View>
         </View>
       ))}
       <Text style={styles.sectionTitle}>Stay Motivated!</Text>
       <Video
-        source={require('../../assets/videos/motivation.mp4')}
+        source={require('../assets/videos/community-welcome.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"

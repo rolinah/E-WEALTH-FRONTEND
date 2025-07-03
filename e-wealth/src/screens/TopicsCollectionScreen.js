@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { Video } from 'expo-av';
 
 const topics = [
-  { name: 'Business Finances', image: require('../../assets/images/business-finances.jpg'), desc: 'Understand the basics of business finance.' },
-  { name: 'Startup Management', image: require('../../assets/images/startup-management.jpg'), desc: 'Master the art of launching startups.' },
+  { name: 'Business Finances', image: require('../assets/images/business-finances.jpg'), desc: 'Understand the basics of business finance.' },
+  { name: 'Startup Management', image: require('../assets/images/startup-management.jpg'), desc: 'Master the art of launching startups.' },
 ];
 
 export default function TopicsCollectionScreen() {
@@ -26,7 +26,7 @@ export default function TopicsCollectionScreen() {
       ))}
       <Text style={styles.sectionTitle}>Watch Intro Video</Text>
       <Video
-        source={require('../../assets/videos/startup-intro.mp4')}
+        source={require('../assets/videos/community-welcome.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"

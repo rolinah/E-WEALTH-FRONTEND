@@ -3,19 +3,19 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { Video } from 'expo-av';
 
 const settingsOptions = [
-  { name: 'Theme', icon: require('../../assets/images/theme-icon.png') },
-  { name: 'App settings', icon: require('../../assets/images/app-settings-icon.png') },
-  { name: 'Languages', icon: require('../../assets/images/language-icon.png') },
-  { name: 'Privacy and Security', icon: require('../../assets/images/privacy-icon.png') },
-  { name: 'Notifications', icon: require('../../assets/images/notification-icon.png') },
-  { name: 'Help and Support', icon: require('../../assets/images/help-icon.png') },
-  { name: 'About', icon: require('../../assets/images/about-icon.png') },
+  { name: 'Theme', icon: require('../assets/images/theme-icon.png') },
+  { name: 'App settings', icon: require('../assets/images/icon.png') },
+  { name: 'Languages', icon: require('../assets/images/icon.png') },
+  { name: 'Privacy and Security', icon: require('../assets/images/icon.png') },
+  { name: 'Notifications', icon: require('../assets/images/icon.png') },
+  { name: 'Help and Support', icon: require('../assets/images/icon.png') },
+  { name: 'About', icon: require('../assets/images/icon.png') },
 ];
 
 export default function SettingsScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../../assets/images/settings-bg.jpg')} style={styles.bg} />
+      <Image source={require('../assets/images/settings-bg.png')} style={styles.bg} />
       <Text style={styles.title}>Settings</Text>
       {settingsOptions.map((opt, idx) => (
         <View key={idx} style={styles.optionRow}>
@@ -25,7 +25,7 @@ export default function SettingsScreen() {
       ))}
       <Text style={styles.sectionTitle}>How to customize your app</Text>
       <Video
-        source={require('../../assets/videos/settings-guide.mp4')}
+        source={require('../assets/videos/sales-preview.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"

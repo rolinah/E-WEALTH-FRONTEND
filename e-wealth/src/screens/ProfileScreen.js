@@ -1,24 +1,50 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Video } from 'expo-av';
+import { api } from '../services/api';
 
 const gallery = [
-  require('../assets/images/gallery1.jpg'),
-  require('../assets/images/gallery2.jpg'),
-  require('../assets/images/gallery3.jpg'),
+  require('../assets/images/icon.png'),
+  require('../assets/images/icon.png'),
+  require('../assets/images/icon.png'),
 ];
 
 const badges = [
-  require('../../assets/images/badge-streak.png'),
-  require('../../assets/images/badge-achievement.png'),
+  require('../assets/images/icon.png'),
+  require('../assets/images/icon.png'),
 ];
 
 export default function ProfileScreen() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    api.getUserProfile()
+      .then(data => {
+        setProfile(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to load profile');
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../../assets/images/profile-pic.jpg')} style={styles.profilePic} />
-      <Text style={styles.title}>Phoebe Ajiko</Text>
-      <Text style={styles.subtitle}>Learner | Finance Enthusiast</Text>
+      {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 40 }} />}
+      {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
+      {profile && (
+        <>
+          <Image source={require('../assets/images/icon.png')} style={styles.profilePic} />
+          <Text style={styles.title}>{profile.name || 'Phoebe Ajiko'}</Text>
+          <Text style={styles.subtitle}>{profile.email || 'Learner | Finance Enthusiast'}</Text>
+          {profile.balance !== undefined && (
+            <Text style={{ color: '#FFD600', marginBottom: 12 }}>Balance: ${profile.balance}</Text>
+          )}
+        </>
+      )}
       <View style={styles.badgesRow}>
         {badges.map((badge, idx) => (
           <Image key={idx} source={badge} style={styles.badge} />
@@ -32,7 +58,7 @@ export default function ProfileScreen() {
       </ScrollView>
       <Text style={styles.sectionTitle}>Your Progress</Text>
       <Video
-        source={require('../../assets/videos/progress-summary.mp4')}
+        source={require('../assets/videos/community-welcome.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"

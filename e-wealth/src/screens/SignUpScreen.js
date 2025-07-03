@@ -6,7 +6,7 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/signup-illustration.png')} style={styles.illustration} />
+      <Image source={require('../assets/images/signup-illustration.png')} style={styles.illustration} />
       <Text style={styles.tagline}>Unlock your learning journey</Text>
       <Text style={styles.title}>Sign Up</Text>
       <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" />
@@ -17,7 +17,7 @@ export default function SignUpScreen() {
       <Text style={styles.link}>Already have an account? Log in</Text>
       <Text style={styles.sectionTitle}>How to use the app</Text>
       <Video
-        source={require('../../assets/videos/signup-intro.mp4')}
+        source={require('../assets/videos/signup-intro.mp4')}
         style={styles.video}
         useNativeControls
         resizeMode="contain"
