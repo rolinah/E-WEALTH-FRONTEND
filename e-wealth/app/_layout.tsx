@@ -21,6 +21,10 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="interests" options={{ title: 'Choose Interests' }} />
+        <Stack.Screen name="topics-collection" options={{ title: 'Topics Collection' }} />
+        <Stack.Screen name="topics-dashboard" options={{ title: 'Topics Dashboard' }} />
+        <Stack.Screen name="new-topics" options={{ title: 'New Topics' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
