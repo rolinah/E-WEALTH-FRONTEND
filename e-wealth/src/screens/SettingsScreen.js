@@ -23,13 +23,8 @@ export default function SettingsScreen() {
           <Text style={styles.optionText}>{opt.name}</Text>
         </View>
       ))}
-      <Text style={styles.sectionTitle}>How to customize your app</Text>
-      <Video
-        source={require('../assets/videos/sales-preview.mp4')}
-        style={styles.video}
-        useNativeControls
-        resizeMode="contain"
-      />
+      <Text style={styles.sectionTitle}>;</Text>
+
     </ScrollView>
   );
 }
