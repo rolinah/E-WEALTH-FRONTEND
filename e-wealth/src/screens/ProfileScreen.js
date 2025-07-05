@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
-import { Video } from 'expo-av';
 import { api } from '../services/api';
 
 const gallery = [
@@ -92,12 +91,10 @@ export default function ProfileScreen({ navigation }) {
         ))}
       </ScrollView>
       <Text style={styles.sectionTitle}>Your Progress</Text>
-      <Video
-        source={require('../assets/videos/community-welcome.mp4')}
-        style={styles.video}
-        useNativeControls
-        resizeMode="contain"
-      />
+      <View style={styles.videoPlaceholder}>
+        <Text style={styles.placeholderText}>Progress video will appear here</Text>
+        <Text style={styles.placeholderSubtext}>Track your learning journey</Text>
+      </View>
       
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Logout</Text>
@@ -121,7 +118,29 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 24, marginBottom: 8, color: '#fff', textAlign: 'center' },
   galleryRow: { flexDirection: 'row', marginBottom: 16 },
   galleryImg: { width: 80, height: 80, borderRadius: 12, marginRight: 8 },
-  video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20 },
+  videoPlaceholder: { 
+    width: '100%', 
+    height: 180, 
+    borderRadius: 12, 
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed'
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center'
+  },
   logoutButton: {
     backgroundColor: '#ff4444',
     borderRadius: 8,

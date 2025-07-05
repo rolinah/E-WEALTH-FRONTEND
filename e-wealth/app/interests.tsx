@@ -1,2 +1,5 @@
 import InterestsScreen from '../src/screens/InterestsScreen';
-export default InterestsScreen; 
+
+export default function Interests() {
+  return <InterestsScreen />;
+} 

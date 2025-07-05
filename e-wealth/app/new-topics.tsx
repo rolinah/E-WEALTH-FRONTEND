@@ -1,2 +1,5 @@
 import NewTopicsScreen from '../src/screens/NewTopicsScreen';
-export default NewTopicsScreen; 
+
+export default function NewTopics() {
+  return <NewTopicsScreen />;
+} 

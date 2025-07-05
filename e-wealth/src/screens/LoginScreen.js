@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { Video } from 'expo-av';
 import { api } from '../services/api';
 
 export default function LoginScreen({ navigation }) {
@@ -27,7 +26,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/login-illustration.png')} style={styles.illustration} />
+      <Image source={require('../assets/images/icon.png')} style={styles.illustration} />
       <Text style={styles.tagline}>Welcome back! Continue your journey.</Text>
       <Text style={styles.title}>Login</Text>
       
@@ -57,12 +56,10 @@ export default function LoginScreen({ navigation }) {
       </TouchableOpacity>
       
       <Text style={styles.sectionTitle}>How to use the app</Text>
-      <Video
-        source={require('../assets/videos/login-intro.mp4')}
-        style={styles.video}
-        useNativeControls
-        resizeMode="contain"
-      />
+      <View style={styles.videoPlaceholder}>
+        <Text style={styles.placeholderText}>Video tutorial will appear here</Text>
+        <Text style={styles.placeholderSubtext}>Learn how to navigate and use the app features</Text>
+      </View>
     </View>
   );
 }
@@ -77,5 +74,27 @@ const styles = StyleSheet.create({
   buttonText: { color: '#222', fontWeight: 'bold' },
   link: { color: '#007AFF', textAlign: 'center', marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
-  video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20 },
+  videoPlaceholder: { 
+    width: '100%', 
+    height: 180, 
+    borderRadius: 12, 
+    marginBottom: 20,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed'
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center'
+  }
 });

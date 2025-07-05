@@ -1,16 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { Video } from 'expo-av';
+import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { api } from '../services/api';
+import NavigationHelper from '../navigation/NavigationHelper';
 
 const defaultImage = { uri: 'https://placehold.co/200x200/png' };
 const contentCards = [
-  { title: 'Continue Learning', image: { uri: 'https://images.unsplash.com/photo-1513258496099-48168024aec0' }, desc: 'Pick up where you left off.' },
-  { title: 'New Content', image: { uri: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6' }, desc: 'Explore the latest topics.' },
-  { title: 'For You', image: { uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' }, desc: 'Personalized recommendations.' },
+  { 
+    title: 'Continue Learning', 
+    image: { uri: 'https://images.unsplash.com/photo-1513258496099-48168024aec0' }, 
+    desc: 'Pick up where you left off.',
+    action: 'topics-dashboard'
+  },
+  { 
+    title: 'New Content', 
+    image: { uri: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6' }, 
+    desc: 'Explore the latest topics.',
+    action: 'new-topics'
+  },
+  { 
+    title: 'All Topics', 
+    image: { uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' }, 
+    desc: 'Browse all available topics.',
+    action: 'topic-list'
+  },
 ];
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const [bannerError, setBannerError] = useState(false);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,36 +43,59 @@ export default function HomeScreen() {
       });
   }, []);
 
+  const handleCardPress = (action) => {
+    switch (action) {
+      case 'topics-dashboard':
+        NavigationHelper.goToTopicsDashboard(navigation);
+        break;
+      case 'new-topics':
+        NavigationHelper.goToNewTopics(navigation);
+        break;
+      case 'topic-list':
+        NavigationHelper.goToTopicList(navigation);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       {loading && <ActivityIndicator size="large" color="#4F8CFF" style={{ marginTop: 20 }} />}
       {error && <Text style={{ color: 'red', margin: 12 }}>{error}</Text>}
+      
       {dashboard && (
         <View style={styles.dashboardStats}>
           <Text style={styles.dashboardTitle}>Your Stats</Text>
-          <Text>Modules Completed: {dashboard.modulesCompleted}</Text>
-          <Text>Quiz Score: {dashboard.quizScore}</Text>
-          <Text>Current Streak: {dashboard.streak} days</Text>
+          <Text>Modules Completed: {dashboard.modulesCompleted || 0}</Text>
+          <Text>Quiz Score: {dashboard.quizScore || 0}%</Text>
+          <Text>Current Streak: {dashboard.streak || 0} days</Text>
         </View>
       )}
+
       <Image 
         source={bannerError ? defaultImage : { uri: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca' }}
         style={styles.banner}
         onError={() => setBannerError(true)}
       />
+      
       <Text style={styles.quote}>"Learning never exhausts the mind." – Leonardo da Vinci</Text>
-      <Text style={styles.sectionTitle}>Featured Video</Text>
-      <Video
-        source={{ uri: 'https://www.w3schools.com/html/mov_bbb.mp4' }}
-        style={styles.video}
-        useNativeControls
-        resizeMode="contain"
-      />
-      <Text style={styles.sectionTitle}>Your Content</Text>
+      
+      <Text style={styles.sectionTitle}>Featured Content</Text>
+      <View style={styles.videoPlaceholder}>
+        <Text style={styles.placeholderText}>Featured video will appear here</Text>
+        <Text style={styles.placeholderSubtext}>Watch the latest learning content</Text>
+      </View>
+      
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
       {contentCards.map((card, idx) => {
         const [imgError, setImgError] = useState(false);
         return (
-          <View key={idx} style={styles.card}>
+          <TouchableOpacity
+            key={idx}
+            style={styles.card}
+            onPress={() => handleCardPress(card.action)}
+          >
             <Image 
               source={imgError ? defaultImage : card.image} 
               style={styles.cardImage} 
@@ -67,9 +105,26 @@ export default function HomeScreen() {
               <Text style={styles.cardTitle}>{card.title}</Text>
               <Text style={styles.cardDesc}>{card.desc}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         );
       })}
+
+      <View style={styles.quickActions}>
+        <Text style={styles.sectionTitle}>Learning Path</Text>
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => NavigationHelper.goToInterests(navigation)}
+        >
+          <Text style={styles.actionButtonText}>Choose Your Interests</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => NavigationHelper.goToTopicsCollection(navigation)}
+        >
+          <Text style={styles.actionButtonText}>Browse Topics Collection</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -79,12 +134,58 @@ const styles = StyleSheet.create({
   banner: { width: '100%', height: 180, borderRadius: 12, marginBottom: 12 },
   quote: { fontStyle: 'italic', textAlign: 'center', margin: 12, color: '#555' },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12 },
-  video: { width: '100%', height: 200, borderRadius: 12, marginBottom: 20 },
-  card: { flexDirection: 'row', backgroundColor: '#f5f5f5', borderRadius: 12, margin: 12, padding: 12, alignItems: 'center', elevation: 2 },
+  videoPlaceholder: { 
+    width: '100%', 
+    height: 200, 
+    borderRadius: 12, 
+    marginBottom: 20,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+    margin: 12
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center'
+  },
+  card: { 
+    flexDirection: 'row', 
+    backgroundColor: '#f5f5f5', 
+    borderRadius: 12, 
+    margin: 12, 
+    padding: 12, 
+    alignItems: 'center', 
+    elevation: 2 
+  },
   cardImage: { width: 60, height: 60, borderRadius: 8, marginRight: 16 },
   cardText: { flex: 1 },
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#222' },
   cardDesc: { fontSize: 14, color: '#666' },
   dashboardStats: { margin: 12 },
   dashboardTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
+  quickActions: {
+    margin: 12,
+  },
+  actionButton: {
+    backgroundColor: '#4F8CFF',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Video } from 'expo-av';
 import { api } from '../services/api';
 
-const badgeDefault = require('../assets/images/badge-streak.png');
+const badgeDefault = require('../assets/images/icon.png');
 
 export default function TopicsDashboardScreen({ navigation }) {
   const [topics, setTopics] = useState([]);
@@ -74,12 +73,10 @@ export default function TopicsDashboardScreen({ navigation }) {
         </TouchableOpacity>
       ))}
       <Text style={styles.sectionTitle}>Stay Motivated!</Text>
-      <Video
-        source={require('../assets/videos/community-welcome.mp4')}
-        style={styles.video}
-        useNativeControls
-        resizeMode="contain"
-      />
+      <View style={styles.videoPlaceholder}>
+        <Text style={styles.placeholderText}>Motivational video will appear here</Text>
+        <Text style={styles.placeholderSubtext}>Keep up the great work!</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -114,5 +111,27 @@ const styles = StyleSheet.create({
   cardDesc: { fontSize: 14, color: '#666', marginBottom: 8 },
   progressText: { fontSize: 12, color: '#333' },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 24, marginBottom: 8, color: '#fff', textAlign: 'center' },
-  video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20 },
+  videoPlaceholder: { 
+    width: '100%', 
+    height: 180, 
+    borderRadius: 12, 
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed'
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center'
+  }
 }); 
