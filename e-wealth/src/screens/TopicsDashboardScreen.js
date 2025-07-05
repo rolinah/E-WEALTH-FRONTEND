@@ -1,26 +1,56 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Video } from 'expo-av';
 import { api } from '../services/api';
 
 const badgeDefault = require('../assets/images/badge-streak.png');
 
-export default function TopicsDashboardScreen() {
+export default function TopicsDashboardScreen({ navigation }) {
   const [topics, setTopics] = useState([]);
+  const [userTopics, setUserTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.getTopics()
-      .then(data => {
-        setTopics(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to load topics');
-        setLoading(false);
-      });
+    loadTopics();
   }, []);
+
+  const loadTopics = async () => {
+    try {
+      const currentUser = api.getCurrentUser();
+      if (!currentUser) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      const [topicsData, userTopicsData] = await Promise.all([
+        api.getTopics(),
+        api.getUserTopics(currentUser.uid)
+      ]);
+
+      // Merge topics with user progress
+      const topicsWithProgress = topicsData.map(topic => {
+        const userTopic = userTopicsData.find(ut => ut.topicId === topic.id);
+        return {
+          ...topic,
+          progress: userTopic ? userTopic.progress : 0,
+          streak: userTopic ? userTopic.streak : 0
+        };
+      });
+
+      setTopics(topicsWithProgress);
+      setUserTopics(userTopicsData);
+    } catch (err) {
+      setError('Failed to load topics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTopicPress = (topic) => {
+    navigation.navigate('TopicDetails', { topic });
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -28,14 +58,20 @@ export default function TopicsDashboardScreen() {
       {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 40 }} />}
       {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
       {topics.map((topic, idx) => (
-        <View key={idx} style={styles.card}>
+        <TouchableOpacity 
+          key={idx} 
+          style={styles.card}
+          onPress={() => handleTopicPress(topic)}
+        >
           <Image source={badgeDefault} style={styles.badge} />
           <View style={styles.cardText}>
             <Text style={styles.cardTitle}>{topic.name}</Text>
-            <Text style={styles.cardDesc}>{topic.desc}</Text>
-            <Text style={styles.progressText}>Progress: {topic.progress || 0}% | Streak: {topic.streak || 0} days</Text>
+            <Text style={styles.cardDesc}>{topic.description || topic.desc}</Text>
+            <Text style={styles.progressText}>
+              Progress: {topic.progress || 0}% | Streak: {topic.streak || 0} days
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
       ))}
       <Text style={styles.sectionTitle}>Stay Motivated!</Text>
       <Video

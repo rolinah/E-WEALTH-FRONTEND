@@ -1,15 +1,53 @@
 // api.js
-// Axios config for backend calls placeholder
-
-// If you haven't already, run: npm install axios
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:3000/api';
+// Firebase-based API service
+import firebase from './firebase';
 
 export const api = {
-  getUserProfile: () => axios.get(`${BASE_URL}/user/profile`).then(res => res.data),
-  getTopics: () => axios.get(`${BASE_URL}/topics`).then(res => res.data),
-  getDashboard: () => axios.get(`${BASE_URL}/dashboard`).then(res => res.data),
-  getCommunity: () => axios.get(`${BASE_URL}/community`).then(res => res.data),
-  getAdminData: () => axios.get(`${BASE_URL}/admin`).then(res => res.data),
+  // Authentication
+  signUp: (email, password) => firebase.signUp(email, password),
+  signIn: (email, password) => firebase.signIn(email, password),
+  signOut: () => firebase.signOutUser(),
+  getCurrentUser: () => firebase.getCurrentUser(),
+  onAuthStateChange: (callback) => firebase.onAuthStateChange(callback),
+
+  // User Profile
+  createUserProfile: (userId, userData) => firebase.createUserProfile(userId, userData),
+  getUserProfile: (userId) => firebase.getUserProfile(userId),
+  updateUserProfile: (userId, updates) => firebase.updateUserProfile(userId, updates),
+
+  // Topics
+  getTopics: () => firebase.getTopics(),
+  getUserTopics: (userId) => firebase.getUserTopics(userId),
+  updateTopicProgress: (userId, topicId, progress) => firebase.updateTopicProgress(userId, topicId, progress),
+
+  // Community
+  getCommunityPosts: () => firebase.getCommunityPosts(),
+  createCommunityPost: (postData) => firebase.createCommunityPost(postData),
+
+  // Admin
+  getAdminData: () => firebase.getAdminData(),
+
+  // File Upload
+  uploadFile: (file, path) => firebase.uploadFile(file, path),
+
+  // Legacy methods for backward compatibility
+  getDashboard: async () => {
+    const user = firebase.getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
+    
+    const [profile, topics] = await Promise.all([
+      firebase.getUserProfile(user.uid),
+      firebase.getTopics()
+    ]);
+    
+    return {
+      profile,
+      topics,
+      recentActivity: []
+    };
+  },
+
+  getCommunity: async () => {
+    return await firebase.getCommunityPosts();
+  }
 }; 

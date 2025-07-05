@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { Video } from 'expo-av';
 import { api } from '../services/api';
 
@@ -14,22 +14,54 @@ const badges = [
   require('../assets/images/icon.png'),
 ];
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.getUserProfile()
-      .then(data => {
-        setProfile(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to load profile');
-        setLoading(false);
-      });
+    loadProfile();
   }, []);
+
+  const loadProfile = async () => {
+    try {
+      const currentUser = api.getCurrentUser();
+      if (!currentUser) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      const userProfile = await api.getUserProfile(currentUser.uid);
+      setProfile(userProfile);
+    } catch (err) {
+      setError('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.signOut();
+              // Navigation will be handled by auth state listener
+            } catch (error) {
+              Alert.alert('Logout Failed', error.message);
+            }
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -42,6 +74,9 @@ export default function ProfileScreen() {
           <Text style={styles.subtitle}>{profile.email || 'Learner | Finance Enthusiast'}</Text>
           {profile.balance !== undefined && (
             <Text style={{ color: '#FFD600', marginBottom: 12 }}>Balance: ${profile.balance}</Text>
+          )}
+          {profile.streak !== undefined && (
+            <Text style={{ color: '#FFD600', marginBottom: 12 }}>Streak: {profile.streak} days</Text>
           )}
         </>
       )}
@@ -63,6 +98,10 @@ export default function ProfileScreen() {
         useNativeControls
         resizeMode="contain"
       />
+      
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Logout</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -83,4 +122,18 @@ const styles = StyleSheet.create({
   galleryRow: { flexDirection: 'row', marginBottom: 16 },
   galleryImg: { width: 80, height: 80, borderRadius: 12, marginRight: 8 },
   video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20 },
+  logoutButton: {
+    backgroundColor: '#ff4444',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+    maxWidth: 200,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 }); 
