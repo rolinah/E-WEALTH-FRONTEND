@@ -16,6 +16,8 @@ const badges = [
   require('../assets/images/icon.png'),
 ];
 
+const BACKEND_URL = 'http://localhost:3000';
+
 export default function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +39,12 @@ export default function ProfileScreen({ navigation }) {
       }
       const userProfile = await api.getUserProfile(currentUser.uid);
       setProfile(userProfile);
+      // Fetch videos from backend
+      const res = await fetch(`${BACKEND_URL}/videos/${currentUser.uid}`);
+      const videoList = await res.json();
+      setVideos(videoList.map(v => v.url));
     } catch (err) {
-      setError('Failed to load profile');
+      setError('Failed to load profile or videos');
     } finally {
       setLoading(false);
     }
@@ -72,8 +78,28 @@ export default function ProfileScreen({ navigation }) {
       quality: 1,
     });
     if (!result.cancelled) {
-      setVideos((prev) => [...prev, result.uri]);
-      // Here you would upload the video to your backend/storage
+      try {
+        const currentUser = api.getCurrentUser();
+        if (!currentUser) throw new Error('User not authenticated');
+        const formData = new FormData();
+        formData.append('video', {
+          uri: result.uri,
+          name: 'video.mp4',
+          type: 'video/mp4',
+        });
+        formData.append('userId', currentUser.uid);
+        const res = await fetch(`${BACKEND_URL}/upload`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        const data = await res.json();
+        setVideos((prev) => [...prev, data.url]);
+      } catch (err) {
+        Alert.alert('Upload failed', err.message);
+      }
     }
   };
 
