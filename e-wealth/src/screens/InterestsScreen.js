@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Video } from 'expo-av';
 
 const interests = [
@@ -12,17 +12,23 @@ const interests = [
 export default function InterestsScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Choose Your Interests</Text>
+      <Text style={styles.title}>Choose your interest</Text>
       <Text style={styles.subtitle}>Select topics that excite you</Text>
-      {interests.map((interest, idx) => (
-        <View key={idx} style={styles.card}>
-          <Image source={interest.icon} style={styles.icon} />
-          <View>
-            <Text style={styles.interestName}>{interest.name}</Text>
-            <Text style={styles.interestDesc}>{interest.desc}</Text>
-          </View>
-        </View>
-      ))}
+      <View style={styles.cardList}>
+        {interests.map((interest, idx) => (
+          <TouchableOpacity key={idx} style={styles.card}>
+            <Image source={interest.icon} style={styles.icon} />
+            <View>
+              <Text style={styles.interestName}>{interest.name}</Text>
+              <Text style={styles.interestDesc}>{interest.desc}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+        {/* Add button styled as a card */}
+        <TouchableOpacity style={styles.addCard}>
+          <Text style={styles.addText}>+</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={styles.sectionTitle}>Why choosing your interests matters</Text>
       <Video
         source={require('../assets/videos/community-welcome.mp4')}
@@ -37,39 +43,66 @@ export default function InterestsScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#FFE066',
+    backgroundColor: '#FFD600',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    margin: 12,
+    color: '#222',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: '#555',
     marginBottom: 16,
+    textAlign: 'center',
+  },
+  cardList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 12,
+    width: '100%',
+    maxWidth: 400,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    width: '100%',
-    maxWidth: 350,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    padding: 12,
+    margin: 12,
+    width: 170,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  addCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    margin: 12,
+    width: 170,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  addText: {
+    fontSize: 32,
+    color: '#222',
+    fontWeight: 'bold',
   },
   icon: { width: 40, height: 40, marginRight: 16 },
   interestName: { fontSize: 18, fontWeight: 'bold', color: '#222' },
   interestDesc: { fontSize: 14, color: '#666' },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 24, marginBottom: 8, textAlign: 'center' },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12, textAlign: 'center' },
   video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20 },
 }); 

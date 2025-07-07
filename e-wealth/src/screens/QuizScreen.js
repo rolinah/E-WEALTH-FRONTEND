@@ -147,7 +147,8 @@ export default function QuizScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4F8CFF',
+    backgroundColor: '#fff',
+    padding: 24,
   },
   header: {
     backgroundColor: '#fff',
@@ -165,11 +166,14 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   questionCard: {
-    backgroundColor: '#fff',
-    margin: 20,
+    backgroundColor: '#f5f5f5',
     borderRadius: 12,
-    padding: 20,
+    padding: 12,
+    margin: 12,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
   },
   questionText: {
     fontSize: 18,

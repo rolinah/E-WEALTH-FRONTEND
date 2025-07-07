@@ -14,30 +14,23 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-
     if (password.length < 6) {
       Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
-
     setLoading(true);
     try {
       const userCredential = await api.signUp(email, password);
-      
-      // Create user profile
       await api.createUserProfile(userCredential.uid, {
         name,
         email,
         displayName: name
       });
-
       Alert.alert('Success', 'Account created successfully!');
-      // Navigation will be handled by auth state listener
     } catch (error) {
       Alert.alert('Sign Up Failed', error.message);
     } finally {
@@ -47,91 +40,114 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/icon.png')} style={styles.illustration} />
-      <Text style={styles.tagline}>Unlock your learning journey</Text>
-      <Text style={styles.title}>Sign Up</Text>
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Full Name" 
-        value={name}
-        onChangeText={setName}
-        autoCapitalize="words"
-      />
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Email" 
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-      />
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Password" 
-        secureTextEntry 
-        value={password}
-        onChangeText={setPassword}
-      />
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Confirm Password" 
-        secureTextEntry 
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-      />
-      
-      <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.link}>Already have an account? Log in</Text>
-      </TouchableOpacity>
-      
-      <Text style={styles.sectionTitle}>How to use the app</Text>
-      <View style={styles.videoPlaceholder}>
-        <Text style={styles.placeholderText}>Video tutorial will appear here</Text>
-        <Text style={styles.placeholderSubtext}>Learn how to navigate and use the app features</Text>
+      <View style={styles.card}>
+        <Image source={require('../assets/images/icon.png')} style={styles.logo} />
+        <Text style={styles.title}>Sign Up</Text>
+        <TextInput 
+          style={styles.input} 
+          placeholder="Full Name" 
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+        />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Email" 
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Password" 
+          secureTextEntry 
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Confirm Password" 
+          secureTextEntry 
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.link}>Already have an account? Log in</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
-  illustration: { width: 120, height: 120, alignSelf: 'center', marginBottom: 12 },
-  tagline: { fontSize: 16, color: '#888', textAlign: 'center', marginBottom: 8 },
-  title: { fontSize: 24, fontWeight: '600', marginBottom: 16, textAlign: 'center' },
-  input: { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 12, marginBottom: 12 },
-  button: { backgroundColor: '#FFD600', borderRadius: 8, padding: 16, alignItems: 'center', marginBottom: 12 },
-  buttonText: { color: '#222', fontWeight: 'bold' },
-  link: { color: '#007AFF', textAlign: 'center', marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
-  videoPlaceholder: { 
-    width: '100%', 
-    height: 180, 
-    borderRadius: 12, 
-    marginBottom: 20,
-    backgroundColor: '#f5f5f5',
+  container: {
+    flex: 1,
+    backgroundColor: '#FFD600',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderStyle: 'dashed'
+    padding: 24,
   },
-  placeholderText: {
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: 340,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 16,
+    borderRadius: 40,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    margin: 12,
+    color: '#222',
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    width: '100%',
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 8
+    borderWidth: 1,
+    borderColor: '#eee',
+    color: '#222',
   },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center'
-  }
+  button: {
+    backgroundColor: '#222',
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  link: {
+    color: '#222',
+    textAlign: 'center',
+    marginTop: 8,
+    fontSize: 15,
+  },
 });

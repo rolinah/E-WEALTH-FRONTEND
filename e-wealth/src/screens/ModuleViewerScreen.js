@@ -96,7 +96,8 @@ export default function ModuleViewerScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4F8CFF',
+    backgroundColor: '#fff',
+    padding: 24,
   },
   header: {
     backgroundColor: '#fff',
@@ -194,15 +195,21 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   button: {
+    backgroundColor: '#4F8CFF',
     borderRadius: 8,
-    padding: 15,
+    paddingVertical: 16,
     alignItems: 'center',
+    margin: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
   },
   nextButton: {
     backgroundColor: '#FFD600',
   },
   buttonText: {
-    color: '#222',
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },

@@ -130,16 +130,16 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#1A2EFF' },
   banner: { width: '100%', height: 180, borderRadius: 12, marginBottom: 12 },
-  quote: { fontStyle: 'italic', textAlign: 'center', margin: 12, color: '#555' },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12 },
+  quote: { fontStyle: 'italic', textAlign: 'center', margin: 12, color: '#fff' },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12, color: '#fff' },
   videoPlaceholder: { 
     width: '100%', 
     height: 200, 
     borderRadius: 12, 
     marginBottom: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -149,18 +149,18 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 16,
-    color: '#666',
+    color: '#222',
     textAlign: 'center',
     marginBottom: 8
   },
   placeholderSubtext: {
     fontSize: 14,
-    color: '#999',
+    color: '#666',
     textAlign: 'center'
   },
   card: { 
     flexDirection: 'row', 
-    backgroundColor: '#f5f5f5', 
+    backgroundColor: '#fff', 
     borderRadius: 12, 
     margin: 12, 
     padding: 12, 
@@ -171,20 +171,20 @@ const styles = StyleSheet.create({
   cardText: { flex: 1 },
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#222' },
   cardDesc: { fontSize: 14, color: '#666' },
-  dashboardStats: { margin: 12 },
-  dashboardTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
+  dashboardStats: { margin: 12, backgroundColor: '#fff', borderRadius: 12, padding: 12 },
+  dashboardTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: '#222' },
   quickActions: {
     margin: 12,
   },
   actionButton: {
-    backgroundColor: '#4F8CFF',
+    backgroundColor: '#FFD600',
     borderRadius: 8,
     padding: 15,
     marginBottom: 10,
     alignItems: 'center',
   },
   actionButtonText: {
-    color: '#fff',
+    color: '#222',
     fontWeight: 'bold',
     fontSize: 16,
   },
