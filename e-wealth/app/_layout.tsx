@@ -35,6 +35,13 @@ function AuthGate() {
             <Stack.Screen name="topic-list" options={{ title: 'Topic List' }} />
             <Stack.Screen name="module-viewer" options={{ title: 'Module Viewer' }} />
             <Stack.Screen name="quiz" options={{ title: 'Quiz' }} />
+            {/* New Feature Screens */}
+            <Stack.Screen name="skill-gap-analysis" options={{ title: 'Skill Gap Analysis' }} />
+            <Stack.Screen name="progress-dashboard" options={{ title: 'Progress Dashboard' }} />
+            <Stack.Screen name="forum" options={{ title: 'Forum' }} />
+            <Stack.Screen name="peer-mentoring" options={{ title: 'Peer Mentoring' }} />
+            <Stack.Screen name="admin-content-manager" options={{ title: 'Admin Content Manager' }} />
+            <Stack.Screen name="admin-analytics" options={{ title: 'Admin Analytics' }} />
             {/* Other Screens */}
             <Stack.Screen name="splash" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />

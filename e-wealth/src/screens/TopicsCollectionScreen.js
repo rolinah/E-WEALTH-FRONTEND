@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Platform } from 'react-native';
 import { Video } from 'expo-av';
+import { auth } from '../services/firebase';
 
 const topics = [
   { name: 'Business Finances', image: require('../assets/images/business-finances.jpg'), desc: 'Understand the basics of business finance.' },

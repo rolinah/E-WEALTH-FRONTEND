@@ -1,5 +1,8 @@
-import TopicListScreen from '../src/screens/TopicListScreen';
-
-export default function TopicList() {
-  return <TopicListScreen />;
+import { View, Text } from 'react-native';
+export default function TopicListScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Topic List Screen</Text>
+    </View>
+  );
 } 
