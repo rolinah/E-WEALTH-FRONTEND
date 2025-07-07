@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Video } from 'expo-av';
-import { getTopics } from '../services/firebase';
+import { api } from '../services/api';
 
 export default function TopicsCollectionScreen() {
   const [topics, setTopics] = useState([]);
@@ -10,7 +10,7 @@ export default function TopicsCollectionScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await getTopics();
+        const data = await api.getTopics();
         setTopics(data);
       } catch (e) {
         // handle error

@@ -1,12 +1,7 @@
 // admin.js
 // Service for admin content management and analytics logic. 
 
-import { db, uploadFile } from './firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
-// uploadAdminVideo: Uploads a video file to the backend or storage service.
-// @param {File} videoFile - The video file to upload.
-// @returns {Promise<string>} - Resolves with the video URL or throws on error.
+// TODO: Admin upload features are not implemented. Implement with MySQL backend or another service as needed.
 export async function uploadAdminVideo(videoFile) {
   // TODO: Implement actual upload logic (e.g., Firebase Storage, S3, etc.)
   throw new Error('uploadAdminVideo not implemented');
@@ -23,16 +18,18 @@ export async function uploadAdminTopicWithVideo(title, description, videoFile) {
     const videoPath = `topics/videos/${Date.now()}_${videoFile.name}`;
     const response = await fetch(videoFile.uri);
     const blob = await response.blob();
-    const videoURL = await uploadFile(blob, videoPath);
+    // const videoURL = await uploadFile(blob, videoPath);
+    throw new Error('Admin video upload is not implemented: uploadFile dependency missing.');
     // Save topic to Firestore
-    const topicsRef = collection(db, 'topics');
-    const docRef = await addDoc(topicsRef, {
-      title,
-      description,
-      videoURL,
-      createdAt: serverTimestamp(),
-    });
-    return docRef.id;
+    // const topicsRef = collection(db, 'topics');
+    // const docRef = await addDoc(topicsRef, {
+    //   title,
+    //   description,
+    //   videoURL,
+    //   createdAt: serverTimestamp(),
+    // });
+    // return docRef.id;
+    throw new Error('Admin topic upload is not implemented: Firebase dependency missing.');
   } catch (error) {
     throw error;
   }

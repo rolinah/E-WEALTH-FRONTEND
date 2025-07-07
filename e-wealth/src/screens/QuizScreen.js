@@ -7,7 +7,7 @@ export default function QuizScreen({ route, navigation }) {
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
-  // Sample quiz questions - in a real app, these would come from Firebase
+  // Sample quiz questions - in a real app, these would come from the backend API (MySQL)
   const questions = [
     {
       question: "What is the primary purpose of a budget?",

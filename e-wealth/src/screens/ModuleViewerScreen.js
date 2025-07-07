@@ -16,7 +16,7 @@ export default function ModuleViewerScreen({ route, navigation }) {
           text: 'Complete',
           onPress: () => {
             setCompleted(true);
-            // Here you would update the user's progress in Firebase
+            // Here you would update the user's progress via the backend API (MySQL)
             Alert.alert('Success', 'Module completed!');
             navigation.goBack();
           }

@@ -5,6 +5,8 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -34,6 +36,90 @@ async function ensureTable() {
 }
 ensureTable();
 
+// Create users table if not exists
+async function ensureUserTable() {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(255) UNIQUE,
+      password VARCHAR(255),
+      name VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+  await pool.query(sql);
+}
+ensureUserTable();
+
+// Ensure topics and user_topics tables exist
+async function ensureTopicsTables() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS topics (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(255),
+      description TEXT
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS user_topics (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      topic_id INT,
+      progress INT DEFAULT 0,
+      completed BOOLEAN DEFAULT FALSE,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (topic_id) REFERENCES topics(id)
+    )
+  `);
+}
+ensureTopicsTables();
+
+// Ensure modules table exists
+async function ensureModulesTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS modules (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      topic_id INT,
+      title VARCHAR(255),
+      content TEXT,
+      duration INT,
+      type VARCHAR(50),
+      video VARCHAR(255),
+      image VARCHAR(255),
+      FOREIGN KEY (topic_id) REFERENCES topics(id)
+    )
+  `);
+}
+ensureModulesTable();
+
+// Ensure posts table exists
+async function ensurePostsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      content TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+}
+ensurePostsTable();
+
+// Ensure badges table exists
+async function ensureBadgesTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS badges (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      name VARCHAR(255),
+      awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+}
+ensureBadgesTable();
+
 // Video upload endpoint
 app.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -47,6 +133,106 @@ app.post('/upload', upload.single('video'), async (req, res) => {
 app.get('/videos/:userId', async (req, res) => {
   const [rows] = await pool.query('SELECT * FROM videos WHERE user_id = ?', [req.params.userId]);
   res.json(rows);
+});
+
+// Get all topics with their modules
+app.get('/topics', async (req, res) => {
+  const [topics] = await pool.query('SELECT * FROM topics');
+  for (const topic of topics) {
+    const [modules] = await pool.query('SELECT * FROM modules WHERE topic_id = ?', [topic.id]);
+    topic.modules = modules;
+  }
+  res.json(topics);
+});
+
+// Get a single topic with its modules
+app.get('/topics/:id', async (req, res) => {
+  const [topics] = await pool.query('SELECT * FROM topics WHERE id = ?', [req.params.id]);
+  if (!topics.length) return res.status(404).json({ error: 'Topic not found' });
+  const topic = topics[0];
+  const [modules] = await pool.query('SELECT * FROM modules WHERE topic_id = ?', [topic.id]);
+  topic.modules = modules;
+  res.json(topic);
+});
+
+// Get user progress
+app.get('/user-topics/:userId', async (req, res) => {
+  const [rows] = await pool.query('SELECT * FROM user_topics WHERE user_id = ?', [req.params.userId]);
+  res.json(rows);
+});
+
+// Update user progress
+app.post('/user-topics/:userId/:topicId', express.json(), async (req, res) => {
+  const { progress, completed } = req.body;
+  await pool.query(
+    'INSERT INTO user_topics (user_id, topic_id, progress, completed) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE progress=?, completed=?',
+    [req.params.userId, req.params.topicId, progress, completed, progress, completed]
+  );
+  res.json({ success: true });
+});
+
+// Get all posts
+app.get('/posts', async (req, res) => {
+  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  res.json(rows);
+});
+
+// Create a post
+app.post('/posts', express.json(), async (req, res) => {
+  const { userId, content } = req.body;
+  await pool.query('INSERT INTO posts (user_id, content) VALUES (?, ?)', [userId, content]);
+  res.json({ success: true });
+});
+
+// Get user badges
+app.get('/badges/:userId', async (req, res) => {
+  const [rows] = await pool.query('SELECT * FROM badges WHERE user_id = ?', [req.params.userId]);
+  res.json(rows);
+});
+
+// Award badge
+app.post('/badges/:userId', express.json(), async (req, res) => {
+  const { name } = req.body;
+  await pool.query('INSERT INTO badges (user_id, name) VALUES (?, ?)', [req.params.userId, name]);
+  res.json({ success: true });
+});
+
+// Signup
+app.post('/auth/signup', express.json(), async (req, res) => {
+  const { email, password, name } = req.body;
+  const hash = await bcrypt.hash(password, 10);
+  try {
+    await pool.query('INSERT INTO users (email, password, name) VALUES (?, ?, ?)', [email, hash, name]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: 'Email already exists' });
+  }
+});
+
+// Login
+app.post('/auth/login', express.json(), async (req, res) => {
+  const { email, password } = req.body;
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+  if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
+  const user = rows[0];
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+  const token = jwt.sign({ id: user.id, email: user.email }, 'your_jwt_secret', { expiresIn: '7d' });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+});
+
+// Get profile (protected)
+app.get('/profile', async (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth) return res.status(401).json({ error: 'No token' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], 'your_jwt_secret');
+    const [rows] = await pool.query('SELECT id, email, name FROM users WHERE id = ?', [decoded.id]);
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
 });
 
 // Health check

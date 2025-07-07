@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
 import { api } from '../services/api';
 import NavigationHelper from '../navigation/NavigationHelper';
 
@@ -61,6 +61,10 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
+      {/* App Name Header */}
+      <View style={styles.appNameHeader}>
+        <Text style={styles.appNameText}>E-Wealth Hub</Text>
+      </View>
       {loading && <ActivityIndicator size="large" color="#4F8CFF" style={{ marginTop: 20 }} />}
       {error && <Text style={{ color: 'red', margin: 12 }}>{error}</Text>}
       
@@ -131,6 +135,27 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1A2EFF' },
+  appNameHeader: {
+    width: '100%',
+    backgroundColor: '#1A2EFF',
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 18,
+    alignItems: 'center',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginBottom: 8,
+    elevation: 4,
+  },
+  appNameText: {
+    color: '#FFD600',
+    fontSize: 32,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+    fontFamily: Platform.OS === 'ios' ? 'AvenirNext-Bold' : 'sans-serif-condensed',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 4,
+  },
   banner: { width: '100%', height: 180, borderRadius: 12, marginBottom: 12 },
   quote: { fontStyle: 'italic', textAlign: 'center', margin: 12, color: '#fff' },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12, color: '#fff' },

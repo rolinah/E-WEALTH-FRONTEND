@@ -1,53 +1,54 @@
 // api.js
-// Firebase-based API service
-import firebase from './firebase';
+
+const BACKEND_URL = 'http://localhost:3000';
 
 export const api = {
   // Authentication
-  signUp: (email, password) => firebase.signUp(email, password),
-  signIn: (email, password) => firebase.signIn(email, password),
-  signOut: () => firebase.signOutUser(),
-  getCurrentUser: () => firebase.getCurrentUser(),
-  onAuthStateChange: (callback) => firebase.onAuthStateChange(callback),
-
-  // User Profile
-  createUserProfile: (userId, userData) => firebase.createUserProfile(userId, userData),
-  getUserProfile: (userId) => firebase.getUserProfile(userId),
-  updateUserProfile: (userId, updates) => firebase.updateUserProfile(userId, updates),
-
-  // Topics
-  getTopics: () => firebase.getTopics(),
-  getUserTopics: (userId) => firebase.getUserTopics(userId),
-  updateTopicProgress: (userId, topicId, progress) => firebase.updateTopicProgress(userId, topicId, progress),
-
-  // Community
-  getCommunityPosts: () => firebase.getCommunityPosts(),
-  createCommunityPost: (postData) => firebase.createCommunityPost(postData),
-
-  // Admin
-  getAdminData: () => firebase.getAdminData(),
-
-  // File Upload
-  uploadFile: (file, path) => firebase.uploadFile(file, path),
-
-  // Legacy methods for backward compatibility
-  getDashboard: async () => {
-    const user = firebase.getCurrentUser();
-    if (!user) throw new Error('User not authenticated');
-    
-    const [profile, topics] = await Promise.all([
-      firebase.getUserProfile(user.uid),
-      firebase.getTopics()
-    ]);
-    
-    return {
-      profile,
-      topics,
-      recentActivity: []
-    };
+  signUp: async (email, password, name) => {
+    const res = await fetch(`${BACKEND_URL}/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Signup failed');
+    return await res.json();
   },
-
-  getCommunity: async () => {
-    return await firebase.getCommunityPosts();
-  }
+  signIn: async (email, password) => {
+    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Login failed');
+    const data = await res.json();
+    localStorage.setItem('jwt', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data.user;
+  },
+  signOut: async () => {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('user');
+  },
+  getCurrentUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
+  getProfile: async () => {
+    const token = localStorage.getItem('jwt');
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`${BACKEND_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch profile');
+    return await res.json();
+  },
+  getTopics: async () => {
+    const token = localStorage.getItem('jwt');
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`${BACKEND_URL}/api/topics`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch topics');
+    return await res.json();
+  },
 }; 

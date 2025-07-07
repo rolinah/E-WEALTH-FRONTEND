@@ -12,77 +12,55 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState(null);
+  const [user, setUser] = useState(api.getCurrentUser());
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = api.onAuthStateChange(async (user) => {
-      setUser(user);
-      
-      if (user) {
-        try {
-          const profile = await api.getUserProfile(user.uid);
-          setUserProfile(profile);
-        } catch (error) {
-          console.error('Failed to load user profile:', error);
-        }
-      } else {
-        setUserProfile(null);
-      }
-      
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    setUser(api.getCurrentUser());
   }, []);
 
   const signUp = async (email, password, userData) => {
+    setLoading(true);
     try {
-      const userCredential = await api.signUp(email, password);
-      await api.createUserProfile(userCredential.uid, userData);
-      return userCredential;
-    } catch (error) {
-      throw error;
+      await api.signUp(email, password, userData.name);
+      await signIn(email, password);
+    } finally {
+      setLoading(false);
     }
   };
 
   const signIn = async (email, password) => {
+    setLoading(true);
     try {
-      return await api.signIn(email, password);
-    } catch (error) {
-      throw error;
+      const user = await api.signIn(email, password);
+      setUser(user);
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
+    setLoading(true);
     try {
       await api.signOut();
-    } catch (error) {
-      throw error;
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const updateProfile = async (updates) => {
-    if (!user) throw new Error('User not authenticated');
-    
-    try {
-      await api.updateUserProfile(user.uid, updates);
-      setUserProfile(prev => ({ ...prev, ...updates }));
-    } catch (error) {
-      throw error;
-    }
+  const getProfile = async () => {
+    return await api.getProfile();
   };
 
   const value = {
     user,
-    userProfile,
     loading,
     signUp,
     signIn,
     signOut,
-    updateProfile,
-    isAuthenticated: !!user
+    getProfile,
+    isAuthenticated: !!user,
   };
 
   return (
