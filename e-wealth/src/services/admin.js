@@ -12,24 +12,28 @@ export async function uploadAdminVideo(videoFile) {
 // @param {string} description - Topic description
 // @param {object} videoFile - Video file object from DocumentPicker
 // @returns {Promise<string>} - Resolves with the topic document ID
-export async function uploadAdminTopicWithVideo(title, description, videoFile) {
+export async function uploadAdminTopicWithVideo(title, description, videoFile, topicId = 1, duration = 0, type = 'video') {
   try {
-    // Upload video to Storage
-    const videoPath = `topics/videos/${Date.now()}_${videoFile.name}`;
-    const response = await fetch(videoFile.uri);
-    const blob = await response.blob();
-    // const videoURL = await uploadFile(blob, videoPath);
-    throw new Error('Admin video upload is not implemented: uploadFile dependency missing.');
-    // Save topic to Firestore
-    // const topicsRef = collection(db, 'topics');
-    // const docRef = await addDoc(topicsRef, {
-    //   title,
-    //   description,
-    //   videoURL,
-    //   createdAt: serverTimestamp(),
-    // });
-    // return docRef.id;
-    throw new Error('Admin topic upload is not implemented: Firebase dependency missing.');
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('topicId', topicId);
+    formData.append('duration', duration);
+    formData.append('type', type);
+    formData.append('video', {
+      uri: videoFile.uri,
+      name: videoFile.name || 'video.mp4',
+      type: videoFile.mimeType || 'video/mp4',
+    });
+    const res = await fetch('http://localhost:3000/admin/upload-module', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Upload failed');
+    return await res.json();
   } catch (error) {
     throw error;
   }
