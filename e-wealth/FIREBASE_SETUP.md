@@ -277,3 +277,45 @@ For Firebase-specific issues, refer to:
 - [Firebase Support](https://firebase.google.com/support)
 
 For app-specific issues, check the console logs and ensure all dependencies are properly installed. 
+
+---
+
+## What This Means
+
+- **You are running your project in web mode (e.g., with `expo start` and opening in a browser).**
+- **The required web dependencies are missing.**
+
+---
+
+## How to Fix
+
+### **Option 1: Install the Required Web Dependencies**
+
+Open a terminal in your project root and run:
+```sh
+npx expo install react-dom react-native-web @expo/metro-runtime
+```
+This will install the correct versions for Expo web support.
+
+---
+
+### **Option 2: If You Do NOT Want Web Support**
+
+- Open your `app.json` or `app.config.js` file.
+- Find the `platforms` array and remove `"web"` if present.
+  ```json
+  "platforms": ["ios", "android"]
+  ```
+- Save and restart your project.
+
+---
+
+## **What Should You Do?**
+
+- If you want to run your app in the browser (web), **run the install command above**.
+- If you only want to run on mobile, **remove `"web"` from your platforms**.
+
+---
+
+**After installing, restart your dev server.**  
+If you see any more errors, let me know and I’ll help you further! 
