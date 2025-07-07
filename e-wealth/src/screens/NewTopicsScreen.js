@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { Video } from 'expo-av';
 
 const newTopics = [
-  { name: 'Sales Basics', image: require('../assets/images/sales-topic.jpg'), desc: 'Learn the basics of sales in just 10 minutes.', video: require('../assets/videos/sales-preview.mp4') },
-  { name: 'Team Leadership', image: require('../assets/images/leadership-topic.jpg'), desc: 'Lead your team to success.', video: require('../assets/videos/leadership-preview.mp4') },
+  { name: 'Sales Basics', image: require('../assets/images/icon.png'), desc: 'Learn the basics of sales in just 10 minutes.', video: require('../assets/videos/sales-preview.mp4') },
+  { name: 'Team Leadership', image: require('../assets/images/icon.png'), desc: 'Lead your team to success.', video: require('../assets/videos/leadership-preview.mp4') },
 ];
 
 export default function NewTopicsScreen() {

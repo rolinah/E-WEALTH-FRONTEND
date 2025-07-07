@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Modal } fr
 import { Video } from 'expo-av';
 
 const settingsOptions = [
-  { name: 'Theme', icon: require('../assets/images/theme-icon.png') },
-  { name: 'App settings', icon: require('../assets/images/icon.png') },
-  { name: 'Languages', icon: require('../assets/images/icon.png') },
-  { name: 'Privacy and Security', icon: require('../assets/images/icon.png') },
-  { name: 'Notifications', icon: require('../assets/images/icon.png') },
-  { name: 'Help and Support', icon: require('../assets/images/icon.png') },
-  { name: 'About', icon: require('../assets/images/icon.png') },
+  { name: 'Theme', icon: require('../../assets/images/icon.png') },
+  { name: 'App settings', icon: require('../../assets/images/icon.png') },
+  { name: 'Languages', icon: require('../../assets/images/icon.png') },
+  { name: 'Privacy and Security', icon: require('../../assets/images/icon.png') },
+  { name: 'Notifications', icon: require('../../assets/images/icon.png') },
+  { name: 'Help and Support', icon: require('../../assets/images/icon.png') },
+  { name: 'About', icon: require('../../assets/images/icon.png') },
 ];
 
 const settingsExplanations = {
@@ -27,7 +27,7 @@ export default function SettingsScreen() {
   const [currentExplanation, setCurrentExplanation] = useState('');
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../assets/images/settings-bg.png')} style={styles.bg} />
+      <Image source={require('../../assets/images/icon.png')} style={styles.bg} />
       <Text style={styles.title}>Settings</Text>
       {settingsOptions.map((opt, idx) => (
         <TouchableOpacity

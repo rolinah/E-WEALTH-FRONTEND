@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import XPProgressBar from '../components/XPProgressBar';
 import Badge from '../components/Badge';
 
-const defaultAvatar = require('../assets/images/icon.png');
+const defaultAvatar = require('../../assets/images/icon.png');
 
 export default function CommunityScreen() {
   const [chats, setChats] = useState([]);

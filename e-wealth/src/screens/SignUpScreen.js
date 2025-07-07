@@ -41,7 +41,7 @@ export default function SignUpScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Image source={require('../assets/images/icon.png')} style={styles.logo} />
+        <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
         <Text style={styles.title}>Sign Up</Text>
         <TextInput 
           style={styles.input} 

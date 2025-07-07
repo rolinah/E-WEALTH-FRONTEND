@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const defaultAvatar = require('../../assets/images/icon.png');
   return (
     <ScrollView style={styles.container}>
       {/* App Name Header */}
@@ -40,11 +41,11 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Continue Learning</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
         <TouchableOpacity style={styles.featuredCard}>
-          <Image source={require('../../src/assets/images/business-finances.jpg')} style={styles.featuredImage} />
+          <Image source={require('../../assets/images/icon.png')} style={styles.featuredImage} />
           <Text style={styles.featuredText}>Learn to Lead</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.featuredCard}>
-          <Image source={require('../../src/assets/images/startup-management.jpg')} style={styles.featuredImage} />
+          <Image source={require('../../assets/images/icon.png')} style={styles.featuredImage} />
           <Text style={styles.featuredText}>New Content</Text>
         </TouchableOpacity>
         {/* Add more featured cards as needed */}

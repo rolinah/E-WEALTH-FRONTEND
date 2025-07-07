@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Image source={require('../assets/images/icon.png')} style={styles.logo} />
+        <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
         <Text style={styles.title}>Login</Text>
         <TextInput 
           style={styles.input} 
