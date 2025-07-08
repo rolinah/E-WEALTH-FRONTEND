@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   }, [user, loading]);
 
   // Auto-logout on app background/close
+  /*
   useEffect(() => {
     const handleAppStateChange = (nextAppState) => {
       if (nextAppState === 'background' || nextAppState === 'inactive') {
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }) => {
       subscription.remove();
     };
   }, []);
+  */
 
   const signUp = async (email, password, userData) => {
     setLoading(true);

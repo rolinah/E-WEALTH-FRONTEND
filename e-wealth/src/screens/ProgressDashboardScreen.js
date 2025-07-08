@@ -2,6 +2,7 @@
 // Screen for visualizing user progress, XP, and weak areas with charts.
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { api } from '../services/api';
 
 const categories = [
   { name: 'Writing', color: '#FFD600' },
@@ -18,6 +19,17 @@ const events = [
 
 export default function ProgressDashboardScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const user = api.getCurrentUser();
+  const isAdmin = user?.role === 'admin' || user?.email === 'admin@example.com';
+  if (isAdmin) {
+    return (
+      <View style={styles.root}>
+        <View style={styles.adminBox}>
+          <Text style={styles.adminText}>Admin accounts do not have learner progress.</Text>
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={styles.root}>
       {/* Sidebar */}
@@ -279,5 +291,18 @@ const styles = StyleSheet.create({
   eventSub: {
     color: '#888',
     fontSize: 13,
+  },
+  adminBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F6FA',
+  },
+  adminText: {
+    fontSize: 18,
+    color: '#1A2EFF',
+    fontWeight: 'bold',
+    marginTop: 40,
+    textAlign: 'center',
   },
 }); 

@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, To
 import { api } from '../services/api';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadAdminTopicWithVideo } from '../services/admin';
+import { AppState } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { useRouter } from 'expo-router';
 
 export default function AdminScreen() {
   const [adminData, setAdminData] = useState(null);
@@ -27,6 +30,28 @@ export default function AdminScreen() {
     Leadership: [],
     Strategy: [],
   });
+  const [materialInputs, setMaterialInputs] = useState({}); // { [interestName]: { title, desc, link } }
+  const [interestMaterials, setInterestMaterials] = useState({ // mock materials for each interest
+    Business: [
+      { title: 'Intro to Business', desc: 'Basics of business', link: 'https://example.com/business.pdf' },
+    ],
+    Sales: [],
+    Management: [],
+    Logistics: [],
+    Finance: [],
+    Entrepreneurship: [],
+    Marketing: [],
+    Leadership: [],
+    Strategy: [],
+  });
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  if (!isAuthenticated) {
+    // Redirect to login
+    router.replace('/auth/login');
+    return null;
+  }
 
   useEffect(() => {
     api.getAdminData()
@@ -91,6 +116,38 @@ export default function AdminScreen() {
     }));
   };
 
+  // Add material to interest (mock)
+  const handleAddMaterial = (interest) => {
+    const mat = materialInputs[interest] || {};
+    if (!mat.title || !mat.link) return;
+    setInterestMaterials((prev) => ({
+      ...prev,
+      [interest]: [...(prev[interest] || []), mat],
+    }));
+    setMaterialInputs((prev) => ({ ...prev, [interest]: { title: '', desc: '', link: '' } }));
+  };
+
+  // Remove material from interest (mock)
+  const handleRemoveMaterial = (interest, idx) => {
+    setInterestMaterials((prev) => ({
+      ...prev,
+      [interest]: prev[interest].filter((_, i) => i !== idx),
+    }));
+  };
+
+  // Auto-logout on app background/close
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        signOut();
+      }
+    };
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Panel</Text>
@@ -136,6 +193,46 @@ export default function AdminScreen() {
                     <TouchableOpacity style={styles.addBtn} onPress={() => handleAddUser(interest.name)}>
                       <Text style={{ color: '#fff', fontWeight: 'bold' }}>Add</Text>
                     </TouchableOpacity>
+                  </View>
+                  {/* Learning Materials Section */}
+                  <View style={styles.materialsBox}>
+                    <Text style={styles.expandedTitle}>Learning Materials</Text>
+                    {(interestMaterials[interest.name] || []).length === 0 && <Text style={{ color: '#888', marginBottom: 8 }}>No materials yet.</Text>}
+                    {(interestMaterials[interest.name] || []).map((mat, i) => (
+                      <View key={i} style={styles.materialRow}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.materialTitle}>{mat.title}</Text>
+                          <Text style={styles.materialDesc}>{mat.desc}</Text>
+                          <Text style={styles.materialLink}>{mat.link}</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => handleRemoveMaterial(interest.name, i)}>
+                          <Text style={styles.removeBtn}>Remove</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                    <View style={styles.addMaterialRow}>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Material Title"
+                        value={materialInputs[interest.name]?.title || ''}
+                        onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], title: text } }))}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Description (optional)"
+                        value={materialInputs[interest.name]?.desc || ''}
+                        onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], desc: text } }))}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="File link (URL)"
+                        value={materialInputs[interest.name]?.link || ''}
+                        onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], link: text } }))}
+                      />
+                      <TouchableOpacity style={styles.addBtn} onPress={() => handleAddMaterial(interest.name)}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Add Material</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               )}
@@ -290,5 +387,38 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     marginLeft: 8,
+  },
+  materialsBox: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 18,
+    width: '100%',
+  },
+  materialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    backgroundColor: '#F5F6FA',
+    borderRadius: 6,
+    padding: 8,
+  },
+  materialTitle: {
+    fontWeight: 'bold',
+    color: '#1A2EFF',
+    fontSize: 15,
+  },
+  materialDesc: {
+    color: '#666',
+    fontSize: 13,
+  },
+  materialLink: {
+    color: '#FF9900',
+    fontSize: 13,
+    textDecorationLine: 'underline',
+  },
+  addMaterialRow: {
+    marginTop: 10,
   },
 }); 

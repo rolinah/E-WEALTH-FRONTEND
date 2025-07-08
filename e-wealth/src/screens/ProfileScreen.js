@@ -78,6 +78,8 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  const isAdmin = profile?.role === 'admin' || profile?.email === 'admin@example.com'; // fallback if no role
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {loading && <ActivityIndicator size="large" color="#FFD600" style={{ marginTop: 40 }} />}
@@ -93,69 +95,81 @@ export default function ProfileScreen({ navigation }) {
           </View>
           <Text style={styles.title}>{profile.name || 'Phoebe Ajiko'}</Text>
           <Text style={styles.subtitle}>{profile.bio || profile.email || 'Learner | Finance Enthusiast'}</Text>
-          {/* Stats Row + Edit Profile Button */}
-          <View style={styles.statsRowFull}>
-            <View style={styles.statCardFull}>
-              <Ionicons name="flame" size={20} color="#FFD600" />
-              <Text style={styles.statValue}>{profile.streak || 0}</Text>
-              <Text style={styles.statLabel}>Streak</Text>
+          {/* Only show learner stats if not admin */}
+          {!isAdmin && (
+            <>
+              {/* Stats Row + Edit Profile Button */}
+              <View style={styles.statsRowFull}>
+                <View style={styles.statCardFull}>
+                  <Ionicons name="flame" size={20} color="#FFD600" />
+                  <Text style={styles.statValue}>{profile.streak || 0}</Text>
+                  <Text style={styles.statLabel}>Streak</Text>
+                </View>
+                <View style={styles.statCardFull}>
+                  <Ionicons name="star" size={20} color="#FFD600" />
+                  <Text style={styles.statValue}>{profile.xp || 0}</Text>
+                  <Text style={styles.statLabel}>XP</Text>
+                </View>
+                <View style={styles.statCardFull}>
+                  <Ionicons name="medal" size={20} color="#FFD600" />
+                  <Text style={styles.statValue}>{badges.length}</Text>
+                  <Text style={styles.statLabel}>Badges</Text>
+                </View>
+                <TouchableOpacity style={styles.editProfileButtonFull} onPress={() => setEditModal(true)}>
+                  <Ionicons name="create-outline" size={20} color="#1A2EFF" />
+                  <Text style={styles.editProfileButtonTextFull}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+              {/* Gallery Section (Images & Videos) */}
+              <View style={styles.cardWhiteGallery}>
+                <Text style={styles.sectionTitleGallery}>Gallery</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryRow}>
+                  {gallery.map((img, idx) => (
+                    <Image key={idx} source={img} style={styles.galleryImg} />
+                  ))}
+                  {videos.map((uri, idx) => (
+                    <View key={idx} style={styles.videoThumb}>
+                      <Ionicons name="videocam" size={28} color="#4F8CFF" />
+                      <Text style={styles.videoLabel}>Video {idx + 1}</Text>
+                    </View>
+                  ))}
+                  <TouchableOpacity style={styles.addVideoButton} onPress={pickVideo}>
+                    <Ionicons name="add" size={28} color="#fff" />
+                    <Text style={styles.addVideoText}>Add</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </View>
+              {/* XP Progress Bar & Streak */}
+              <View style={styles.cardWhiteProgress}>
+                <XPProgressBar xp={profile?.xp || 0} maxXp={1000} />
+                <Text style={styles.streakCounter}>🔥 Streak: {profile?.streak || 0} days</Text>
+              </View>
+            </>
+          )}
+          {/* Show admin message if admin */}
+          {isAdmin && (
+            <View style={styles.adminBox}>
+              <Text style={styles.adminText}>Admin Account</Text>
+              <Text style={styles.adminSubText}>You have admin privileges.</Text>
             </View>
-            <View style={styles.statCardFull}>
-              <Ionicons name="star" size={20} color="#FFD600" />
-              <Text style={styles.statValue}>{profile.xp || 0}</Text>
-              <Text style={styles.statLabel}>XP</Text>
+          )}
+          {/* Logout Button */}
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+          {/* Edit Profile Modal (placeholder) */}
+          <Modal visible={editModal} transparent animationType="slide" onRequestClose={() => setEditModal(false)}>
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Edit Profile (Coming Soon)</Text>
+                <TouchableOpacity style={styles.closeButton} onPress={() => setEditModal(false)}>
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.statCardFull}>
-              <Ionicons name="medal" size={20} color="#FFD600" />
-              <Text style={styles.statValue}>{badges.length}</Text>
-              <Text style={styles.statLabel}>Badges</Text>
-            </View>
-            <TouchableOpacity style={styles.editProfileButtonFull} onPress={() => setEditModal(true)}>
-              <Ionicons name="create-outline" size={20} color="#1A2EFF" />
-              <Text style={styles.editProfileButtonTextFull}>Edit</Text>
-            </TouchableOpacity>
-          </View>
+          </Modal>
         </>
       )}
-      {/* Gallery Section (Images & Videos) */}
-      <View style={styles.cardWhiteGallery}>
-        <Text style={styles.sectionTitleGallery}>Gallery</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryRow}>
-          {gallery.map((img, idx) => (
-            <Image key={idx} source={img} style={styles.galleryImg} />
-          ))}
-          {videos.map((uri, idx) => (
-            <View key={idx} style={styles.videoThumb}>
-              <Ionicons name="videocam" size={28} color="#4F8CFF" />
-              <Text style={styles.videoLabel}>Video {idx + 1}</Text>
-            </View>
-          ))}
-          <TouchableOpacity style={styles.addVideoButton} onPress={pickVideo}>
-            <Ionicons name="add" size={28} color="#fff" />
-            <Text style={styles.addVideoText}>Add</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-      {/* XP Progress Bar & Streak */}
-      <View style={styles.cardWhiteProgress}>
-        <XPProgressBar xp={profile?.xp || 0} maxXp={1000} />
-        <Text style={styles.streakCounter}>🔥 Streak: {profile?.streak || 0} days</Text>
-      </View>
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
-      {/* Edit Profile Modal (placeholder) */}
-      <Modal visible={editModal} transparent animationType="slide" onRequestClose={() => setEditModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Profile (Coming Soon)</Text>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setEditModal(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
@@ -387,5 +401,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  adminBox: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 24,
+    marginVertical: 24,
+    alignItems: 'center',
+    elevation: 1,
+  },
+  adminText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1A2EFF',
+    marginBottom: 6,
+  },
+  adminSubText: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
   },
 }); 
