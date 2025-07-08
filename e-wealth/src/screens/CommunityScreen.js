@@ -4,25 +4,24 @@ import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 're
 import { api } from '../services/api';
 import XPProgressBar from '../components/XPProgressBar';
 import Badge from '../components/Badge';
+import { useAuth } from '../contexts/AuthContext';
 
 const defaultAvatar = require('../../assets/images/icon.png');
 
 export default function CommunityScreen() {
+  const { user } = useAuth();
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Mock gamification data
-  const streak = 5; // e.g., 5 days streak
-  const xp = 320;
-  const maxXp = 500;
-  const badges = [
-    { label: 'First Quiz Completed' },
-    { label: 'Daily Learner' },
-    { label: 'Community Helper' },
-  ];
+  // Gamification state (should be fetched and updated in real-time)
+  const [streak, setStreak] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [maxXp, setMaxXp] = useState(500);
+  const [badges, setBadges] = useState([]);
 
   useEffect(() => {
+    // Fetch community chats
     api.getCommunity()
       .then(data => {
         setChats(data);
@@ -32,7 +31,18 @@ export default function CommunityScreen() {
         setError('Failed to load community feed');
         setLoading(false);
       });
-  }, []);
+    // Fetch gamification data (XP, streak, badges) for the user
+    if (user) {
+      api.getProfile().then(profile => {
+        setXp(profile.xp || 0);
+        setStreak(profile.streak || 0);
+        setBadges(profile.badges || []);
+      });
+    }
+  }, [user]);
+
+  // Example: Call this when user completes a module or logs in for a new day
+  // setXp(xp + 10); setStreak(streak + 1); setBadges([...badges, { label: 'New Badge' }]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -43,8 +53,9 @@ export default function CommunityScreen() {
         <Text style={styles.streakText}>🔥 Streak: {streak} days</Text>
         <XPProgressBar xp={xp} maxXp={maxXp} />
         <View style={styles.badgesRow}>
+          {badges.length === 0 && <Text style={{ color: '#fff' }}>No badges yet</Text>}
           {badges.map((badge, idx) => (
-            <Badge key={idx} label={badge.label} />
+            <Badge key={idx} label={badge.label} icon={badge.icon} />
           ))}
         </View>
       </View>

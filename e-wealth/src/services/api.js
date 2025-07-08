@@ -1,6 +1,6 @@
 // api.js
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = 'http://10.4.60.116:3000';
 
 export const api = {
   // Authentication
@@ -49,6 +49,16 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch topics');
+    return await res.json();
+  },
+  getAdminData: async () => {
+    const res = await fetch('http://localhost:3000/admin/stats');
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch admin stats');
+    return await res.json();
+  },
+  getCommunity: async () => {
+    const res = await fetch('http://localhost:3000/posts');
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch community posts');
     return await res.json();
   },
 }; 

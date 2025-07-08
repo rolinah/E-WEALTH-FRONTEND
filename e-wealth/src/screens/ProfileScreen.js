@@ -56,6 +56,7 @@ export default function ProfileScreen({ navigation }) {
           onPress: async () => {
             try {
               await api.signOut();
+              navigation.replace('auth/login'); // Redirect to Login after Logout
             } catch (error) {
               Alert.alert('Logout Failed', error.message);
             }

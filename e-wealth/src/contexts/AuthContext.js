@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { AppState } from 'react-native';
 
 const AuthContext = createContext();
 
@@ -17,6 +18,23 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     setUser(api.getCurrentUser());
+  }, []);
+
+  useEffect(() => {
+    console.log('[AuthContext] user:', user, 'loading:', loading, 'isAuthenticated:', !!user);
+  }, [user, loading]);
+
+  // Auto-logout on app background/close
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        signOut();
+      }
+    };
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const signUp = async (email, password, userData) => {

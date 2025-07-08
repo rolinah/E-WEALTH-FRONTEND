@@ -242,5 +242,35 @@ app.get('/', (req, res) => res.send('MySQL backend running!'));
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
+// Admin: Upload video and assign to topic/module
+app.post('/admin/upload-module', upload.single('video'), async (req, res) => {
+  const { topicId, title, description, duration, type } = req.body;
+  if (!req.file || !topicId || !title) {
+    return res.status(400).json({ error: 'Missing required fields or video file' });
+  }
+  const videoUrl = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`;
+  try {
+    await pool.query(
+      'INSERT INTO modules (topic_id, title, content, duration, type, video) VALUES (?, ?, ?, ?, ?, ?)',
+      [topicId, title, description || '', duration || 0, type || 'video', videoUrl]
+    );
+    res.json({ success: true, videoUrl });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create module', details: err.message });
+  }
+});
+
+// Admin stats endpoint
+app.get('/admin/stats', async (req, res) => {
+  try {
+    const [[{ totalUsers }]] = await pool.query('SELECT COUNT(*) as totalUsers FROM users');
+    const [[{ activeUsers }]] = await pool.query("SELECT COUNT(*) as activeUsers FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    const [[{ topicsCreated }]] = await pool.query('SELECT COUNT(*) as topicsCreated FROM topics');
+    res.json({ totalUsers, activeUsers, topicsCreated });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch admin stats', details: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
