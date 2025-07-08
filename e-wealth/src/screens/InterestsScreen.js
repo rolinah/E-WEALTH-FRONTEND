@@ -1,111 +1,129 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
-import { Video } from 'expo-av';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 const interests = [
-  { name: 'Business', icon: require('../../assets/images/icon.png'), desc: 'Grow your business skills' },
-  { name: 'Sales', icon: require('../../assets/images/icon.png'), desc: 'Master the art of selling' },
-  { name: 'Management', icon: require('../../assets/images/icon.png'), desc: 'Lead teams to success' },
-  { name: 'Logistics', icon: require('../../assets/images/icon.png'), desc: 'Optimize supply chains' },
+  { name: 'Business', color: '#FFD600' }, // yellow
+  { name: 'Sales', color: '#1A2EFF' },   // blue
+  { name: 'Management', color: '#FF9900' }, // orange
+  { name: 'Logistics', color: '#FFD600' },
+  { name: 'Finance', color: '#1A2EFF' },
+  { name: 'Entrepreneurship', color: '#FF9900' },
+  { name: 'Marketing', color: '#FFD600' },
+  { name: 'Leadership', color: '#1A2EFF' },
+  { name: 'Strategy', color: '#FF9900' },
 ];
 
 export default function InterestsScreen() {
+  const [selected, setSelected] = useState([]);
+
+  const toggleInterest = (name) => {
+    setSelected((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Choose your interest</Text>
-      <Text style={styles.subtitle}>Select topics that excite you</Text>
-      <View style={styles.cardList}>
-        {interests.map((interest, idx) => (
-          <TouchableOpacity key={idx} style={styles.card}>
-            <Image source={interest.icon} style={styles.icon} />
-            <View>
-              <Text style={styles.interestName}>{interest.name}</Text>
-              <Text style={styles.interestDesc}>{interest.desc}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-        {/* Add button styled as a card */}
-        <TouchableOpacity style={styles.addCard}>
-          <Text style={styles.addText}>+</Text>
-        </TouchableOpacity>
+      <Text style={styles.title}>Choose your interests</Text>
+      <Text style={styles.subtitle}>Select topics that excite you and help us personalize your experience.</Text>
+      <View style={styles.chipContainer}>
+        {interests.map((interest, idx) => {
+          const isSelected = selected.includes(interest.name);
+          return (
+            <TouchableOpacity
+              key={idx}
+              style={[styles.chip, isSelected && { backgroundColor: interest.color, borderColor: interest.color }]}
+              activeOpacity={0.8}
+              onPress={() => toggleInterest(interest.name)}
+            >
+              <Text style={[styles.chipText, isSelected && { color: '#222' }]}>{interest.name}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-      <Text style={styles.sectionTitle}>Why choosing your interests matters</Text>
-      {/*
-      <Video
-        //source={require('../assets/videos/community-welcome.mp4')}
-        style={styles.video}
-        useNativeControls
-        resizeMode="contain"
-      />
-      */}
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Why choosing your interests matters</Text>
+        <Text style={styles.sectionDesc}>
+          Selecting your interests helps us tailor content, recommendations, and networking opportunities to your professional goals. You can update your interests anytime in your profile settings.
+        </Text>
+      </View>
     </ScrollView>
   );
 }
 
-// lisa is the best and most beautiful girl in the world
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#FFD600',
-    justifyContent: 'center',
+    backgroundColor: '#101A3D', // deep blue
     alignItems: 'center',
-    padding: 24,
+    padding: 32,
+    paddingTop: 48,
+    minHeight: '100%',
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: 12,
-    color: '#222',
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: 0.2,
   },
   subtitle: {
     fontSize: 16,
-    color: '#555',
-    marginBottom: 16,
+    color: '#E3E6F0',
+    marginBottom: 28,
     textAlign: 'center',
+    maxWidth: 400,
+    lineHeight: 22,
   },
-  cardList: {
+  chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 36,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 420,
   },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    margin: 12,
-    width: 170,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-  },
-  addCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    margin: 12,
-    width: 170,
+  chip: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.12)',
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    margin: 7,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    minWidth: 90,
+    transition: 'all 0.2s',
   },
-  addText: {
-    fontSize: 32,
-    color: '#222',
-    fontWeight: 'bold',
+  chipText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    letterSpacing: 0.1,
   },
-  icon: { width: 40, height: 40, marginRight: 16 },
-  interestName: { fontSize: 18, fontWeight: 'bold', color: '#222' },
-  interestDesc: { fontSize: 14, color: '#666' },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12, textAlign: 'center' },
-  video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20 },
+  sectionCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 16,
+    padding: 28,
+    width: '100%',
+    maxWidth: 420,
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 10,
+    color: '#FFD600',
+    textAlign: 'center',
+  },
+  sectionDesc: {
+    fontSize: 15,
+    color: '#E3E6F0',
+    textAlign: 'center',
+    lineHeight: 22,
+    maxWidth: 360,
+  },
 }); 

@@ -12,12 +12,6 @@ const contentCards = [
     action: 'topics-dashboard'
   },
   { 
-    title: 'New Content', 
-    image: { uri: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6' }, 
-    desc: 'Explore the latest topics.',
-    action: 'new-topics'
-  },
-  { 
     title: 'All Topics', 
     image: { uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' }, 
     desc: 'Browse all available topics.',
@@ -48,9 +42,6 @@ export default function HomeScreen({ navigation }) {
       case 'topics-dashboard':
         NavigationHelper.goToTopicsDashboard(navigation);
         break;
-      case 'new-topics':
-        NavigationHelper.goToNewTopics(navigation);
-        break;
       case 'topic-list':
         NavigationHelper.goToTopicList(navigation);
         break;
@@ -60,73 +51,90 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* App Name Header */}
-      <View style={styles.appNameHeader}>
-        <Text style={styles.appNameText}>E-Wealth Hub</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>E-Wealth Hub</Text>
+        <View style={styles.headerAccent} />
       </View>
-      {loading && <ActivityIndicator size="large" color="#4F8CFF" style={{ marginTop: 20 }} />}
+      {loading && <ActivityIndicator size="large" color="#1A2EFF" style={{ marginTop: 20 }} />}
       {error && <Text style={{ color: 'red', margin: 12 }}>{error}</Text>}
-      
+      {/* Stats Card */}
       {dashboard && (
-        <View style={styles.dashboardStats}>
-          <Text style={styles.dashboardTitle}>Your Stats</Text>
-          <Text>Modules Completed: {dashboard.modulesCompleted || 0}</Text>
-          <Text>Quiz Score: {dashboard.quizScore || 0}%</Text>
-          <Text>Current Streak: {dashboard.streak || 0} days</Text>
+        <View style={styles.statsCard}>
+          <Text style={styles.statsTitle}>Your Stats</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{dashboard.modulesCompleted || 0}</Text>
+              <Text style={styles.statLabel}>Modules</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: '#FFD600' }]}>{dashboard.quizScore || 0}%</Text>
+              <Text style={styles.statLabel}>Quiz Score</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: '#FF9900' }]}>{dashboard.streak || 0}</Text>
+              <Text style={styles.statLabel}>Streak</Text>
+            </View>
+          </View>
         </View>
       )}
-
+      {/* Banner */}
       <Image 
         source={bannerError ? defaultImage : { uri: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca' }}
         style={styles.banner}
         onError={() => setBannerError(true)}
       />
-      
-      <Text style={styles.quote}>"Learning never exhausts the mind." – Leonardo da Vinci</Text>
-      
-      <Text style={styles.sectionTitle}>Featured Content</Text>
-      <View style={styles.videoPlaceholder}>
-        <Text style={styles.placeholderText}>Featured video will appear here</Text>
-        <Text style={styles.placeholderSubtext}>Watch the latest learning content</Text>
+      {/* Quote */}
+      <View style={styles.quoteCard}>
+        <Text style={styles.quoteText}>"Learning never exhausts the mind."</Text>
+        <Text style={styles.quoteAuthor}>– Leonardo da Vinci</Text>
       </View>
-      
+      {/* Featured Content */}
+      <Text style={styles.sectionTitle}>Featured Content</Text>
+      <View style={styles.featuredCard}>
+        <Text style={styles.featuredTitle}>Featured video will appear here</Text>
+        <Text style={styles.featuredSub}>Watch the latest learning content</Text>
+      </View>
+      {/* Quick Actions */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
-      {contentCards.map((card, idx) => {
-        const [imgError, setImgError] = useState(false);
-        return (
-          <TouchableOpacity
-            key={idx}
-            style={styles.card}
-            onPress={() => handleCardPress(card.action)}
-          >
-            <Image 
-              source={imgError ? defaultImage : card.image} 
-              style={styles.cardImage} 
-              onError={() => setImgError(true)}
-            />
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>{card.title}</Text>
-              <Text style={styles.cardDesc}>{card.desc}</Text>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
-
-      <View style={styles.quickActions}>
+      <View style={styles.cardList}>
+        {contentCards.map((card, idx) => {
+          const [imgError, setImgError] = useState(false);
+          return (
+            <TouchableOpacity
+              key={idx}
+              style={styles.actionCard}
+              onPress={() => handleCardPress(card.action)}
+              activeOpacity={0.85}
+            >
+              <Image 
+                source={imgError ? defaultImage : card.image} 
+                style={styles.actionCardImage} 
+                onError={() => setImgError(true)}
+              />
+              <View style={styles.actionCardText}>
+                <Text style={styles.actionCardTitle}>{card.title}</Text>
+                <Text style={styles.actionCardDesc}>{card.desc}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      {/* Learning Path */}
+      <View style={styles.learningPathCard}>
         <Text style={styles.sectionTitle}>Learning Path</Text>
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={[styles.pathButton, { backgroundColor: '#1A2EFF' }]}
           onPress={() => NavigationHelper.goToInterests(navigation)}
         >
-          <Text style={styles.actionButtonText}>Choose Your Interests</Text>
+          <Text style={styles.pathButtonText}>Choose Your Interests</Text>
         </TouchableOpacity>
-        
         <TouchableOpacity 
-          style={styles.actionButton}
+          style={[styles.pathButton, { backgroundColor: '#FFD600' }]}
           onPress={() => NavigationHelper.goToTopicsCollection(navigation)}
         >
-          <Text style={styles.actionButtonText}>Browse Topics Collection</Text>
+          <Text style={[styles.pathButtonText, { color: '#1A2EFF' }]}>Browse Topics Collection</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -134,10 +142,11 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A2EFF' },
-  appNameHeader: {
+  container: { flex: 1, backgroundColor: '#F5F6FA' },
+  contentContainer: { padding: 0, alignItems: 'center' },
+  header: {
     width: '100%',
-    backgroundColor: '#1A2EFF',
+    backgroundColor: '#fff',
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 18,
     alignItems: 'center',
@@ -145,72 +154,149 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
     marginBottom: 8,
     elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
   },
-  appNameText: {
-    color: '#FFD600',
+  headerTitle: {
+    color: '#1A2EFF',
     fontSize: 32,
     fontWeight: 'bold',
     letterSpacing: 2,
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-Bold' : 'sans-serif-condensed',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 2 },
-    textShadowRadius: 4,
+    marginBottom: 2,
   },
-  banner: { width: '100%', height: 180, borderRadius: 12, marginBottom: 12 },
-  quote: { fontStyle: 'italic', textAlign: 'center', margin: 12, color: '#fff' },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', margin: 12, color: '#fff' },
-  videoPlaceholder: { 
-    width: '100%', 
-    height: 200, 
-    borderRadius: 12, 
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#ddd',
-    borderStyle: 'dashed',
-    margin: 12
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: '#222',
-    textAlign: 'center',
-    marginBottom: 8
-  },
-  placeholderSubtext: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center'
-  },
-  card: { 
-    flexDirection: 'row', 
-    backgroundColor: '#fff', 
-    borderRadius: 12, 
-    margin: 12, 
-    padding: 12, 
-    alignItems: 'center', 
-    elevation: 2 
-  },
-  cardImage: { width: 60, height: 60, borderRadius: 8, marginRight: 16 },
-  cardText: { flex: 1 },
-  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#222' },
-  cardDesc: { fontSize: 14, color: '#666' },
-  dashboardStats: { margin: 12, backgroundColor: '#fff', borderRadius: 12, padding: 12 },
-  dashboardTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: '#222' },
-  quickActions: {
-    margin: 12,
-  },
-  actionButton: {
+  headerAccent: {
+    width: 60,
+    height: 5,
     backgroundColor: '#FFD600',
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 3,
+    marginTop: 6,
+  },
+  statsCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 18,
     marginBottom: 10,
+    width: '92%',
+    alignSelf: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1A2EFF',
+    marginBottom: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  actionButtonText: {
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#1A2EFF',
+  },
+  statLabel: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 2,
+  },
+  banner: { width: '92%', height: 160, borderRadius: 14, marginBottom: 16, alignSelf: 'center', objectFit: 'cover' },
+  quoteCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 18,
+    width: '92%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    elevation: 1,
+  },
+  quoteText: {
+    fontStyle: 'italic',
+    fontSize: 16,
+    color: '#1A2EFF',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  quoteAuthor: {
+    fontSize: 14,
+    color: '#888',
+    textAlign: 'center',
+  },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', margin: 12, color: '#1A2EFF' },
+  featuredCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 24,
+    marginBottom: 18,
+    width: '92%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    elevation: 1,
+  },
+  featuredTitle: {
+    fontSize: 16,
     color: '#222',
     fontWeight: 'bold',
-    fontSize: 16,
+    marginBottom: 6,
+  },
+  featuredSub: {
+    fontSize: 14,
+    color: '#888',
+  },
+  cardList: {
+    width: '92%',
+    alignSelf: 'center',
+    marginBottom: 18,
+  },
+  actionCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 14,
+    padding: 12,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  actionCardImage: { width: 60, height: 60, borderRadius: 8, marginRight: 16 },
+  actionCardText: { flex: 1 },
+  actionCardTitle: { fontSize: 17, fontWeight: 'bold', color: '#1A2EFF' },
+  actionCardDesc: { fontSize: 14, color: '#666' },
+  learningPathCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 20,
+    marginBottom: 32,
+    width: '92%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    elevation: 1,
+  },
+  pathButton: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    marginVertical: 8,
+    alignItems: 'center',
+    width: '100%',
+  },
+  pathButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });

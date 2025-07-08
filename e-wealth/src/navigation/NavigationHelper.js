@@ -17,7 +17,6 @@ export const NavigationHelper = {
   goToInterests: (navigation) => navigation.navigate('interests'),
   goToTopicsCollection: (navigation) => navigation.navigate('topics-collection'),
   goToTopicsDashboard: (navigation) => navigation.navigate('topics-dashboard'),
-  goToNewTopics: (navigation) => navigation.navigate('new-topics'),
   goToTopicDetails: (navigation, topic) => navigation.navigate('topic-details', { topic }),
   goToTopicList: (navigation) => navigation.navigate('topic-list'),
   goToModuleViewer: (navigation, module, topic) => 
