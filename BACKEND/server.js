@@ -120,6 +120,15 @@ async function ensureBadgesTable() {
 }
 ensureBadgesTable();
 
+// Update users table to include 'role' if not already present
+(async function ensureUserRoleColumn() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+})();
+
 // Video upload endpoint
 app.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -199,10 +208,15 @@ app.post('/badges/:userId', express.json(), async (req, res) => {
 
 // Signup
 app.post('/auth/signup', express.json(), async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, role, adminSecret } = req.body;
+  if (role === 'admin') {
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ error: 'Invalid or missing admin secret' });
+    }
+  }
   const hash = await bcrypt.hash(password, 10);
   try {
-    await pool.query('INSERT INTO users (email, password, name) VALUES (?, ?, ?)', [email, hash, name]);
+    await pool.query('INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)', [email, hash, name, role || 'user']);
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
@@ -269,6 +283,80 @@ app.get('/admin/stats', async (req, res) => {
     res.json({ totalUsers, activeUsers, topicsCreated });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch admin stats', details: err.message });
+  }
+});
+
+// JWT authentication middleware for /api endpoints
+function authenticateJWT(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth) return res.status(401).json({ error: 'No token' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], 'your_jwt_secret');
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+// /api/user/profile (GET) - alias for /profile, but requires JWT
+app.get('/api/user/profile', authenticateJWT, async (req, res) => {
+  const userId = req.user.id;
+  const [rows] = await pool.query('SELECT id, email, name FROM users WHERE id = ?', [userId]);
+  if (!rows.length) return res.status(404).json({ error: 'User not found' });
+  res.json(rows[0]);
+});
+// /api/topics (GET) - alias for /topics, but requires JWT
+app.get('/api/topics', authenticateJWT, async (req, res) => {
+  const [topics] = await pool.query('SELECT * FROM topics');
+  for (const topic of topics) {
+    const [modules] = await pool.query('SELECT * FROM modules WHERE topic_id = ?', [topic.id]);
+    topic.modules = modules;
+  }
+  res.json(topics);
+});
+// /api/community/posts (GET) - alias for /posts, but requires JWT
+app.get('/api/community/posts', authenticateJWT, async (req, res) => {
+  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  res.json(rows);
+});
+// /api/community/posts (POST) - alias for /posts, but requires JWT
+app.post('/api/community/posts', authenticateJWT, express.json(), async (req, res) => {
+  const userId = req.user.id;
+  const { content } = req.body;
+  await pool.query('INSERT INTO posts (user_id, content) VALUES (?, ?)', [userId, content]);
+  res.json({ success: true });
+});
+// /api/posts (GET) - alias for /posts, but requires JWT
+app.get('/api/posts', authenticateJWT, async (req, res) => {
+  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  res.json(rows);
+});
+// /api/admin/stats (GET) - alias for /admin/stats, but requires JWT
+app.get('/api/admin/stats', authenticateJWT, async (req, res) => {
+  try {
+    const [[{ totalUsers }]] = await pool.query('SELECT COUNT(*) as totalUsers FROM users');
+    const [[{ activeUsers }]] = await pool.query("SELECT COUNT(*) as activeUsers FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    const [[{ topicsCreated }]] = await pool.query('SELECT COUNT(*) as topicsCreated FROM topics');
+    res.json({ totalUsers, activeUsers, topicsCreated });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch admin stats', details: err.message });
+  }
+});
+// /api/user/register (POST) - alias for /auth/signup
+app.post('/api/user/register', express.json(), async (req, res) => {
+  const { email, password, name, role, adminSecret } = req.body;
+  if (role === 'admin') {
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ error: 'Invalid or missing admin secret' });
+    }
+  }
+  const hash = await bcrypt.hash(password, 10);
+  try {
+    await pool.query('INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)', [email, hash, name, role || 'user']);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: 'Email already exists' });
   }
 });
 
