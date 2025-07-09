@@ -7,11 +7,13 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const morgan = require('morgan');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
+app.use(morgan('combined'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MySQL connection pool
@@ -146,7 +148,10 @@ app.get('/videos/:userId', async (req, res) => {
 
 // Get all topics with their modules
 app.get('/topics', async (req, res) => {
-  const [topics] = await pool.query('SELECT * FROM topics');
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const [topics] = await pool.query('SELECT * FROM topics LIMIT ? OFFSET ?', [limit, offset]);
   for (const topic of topics) {
     const [modules] = await pool.query('SELECT * FROM modules WHERE topic_id = ?', [topic.id]);
     topic.modules = modules;
@@ -182,7 +187,10 @@ app.post('/user-topics/:userId/:topicId', express.json(), async (req, res) => {
 
 // Get all posts
 app.get('/posts', async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
   res.json(rows);
 });
 
@@ -311,7 +319,10 @@ app.get('/api/user/profile', authenticateJWT, async (req, res) => {
 });
 // /api/topics (GET) - alias for /topics, but requires JWT
 app.get('/api/topics', authenticateJWT, async (req, res) => {
-  const [topics] = await pool.query('SELECT * FROM topics');
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const [topics] = await pool.query('SELECT * FROM topics LIMIT ? OFFSET ?', [limit, offset]);
   for (const topic of topics) {
     const [modules] = await pool.query('SELECT * FROM modules WHERE topic_id = ?', [topic.id]);
     topic.modules = modules;
@@ -320,7 +331,10 @@ app.get('/api/topics', authenticateJWT, async (req, res) => {
 });
 // /api/community/posts (GET) - alias for /posts, but requires JWT
 app.get('/api/community/posts', authenticateJWT, async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
   res.json(rows);
 });
 // /api/community/posts (POST) - alias for /posts, but requires JWT
@@ -332,7 +346,10 @@ app.post('/api/community/posts', authenticateJWT, express.json(), async (req, re
 });
 // /api/posts (GET) - alias for /posts, but requires JWT
 app.get('/api/posts', authenticateJWT, async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
   res.json(rows);
 });
 // /api/admin/stats (GET) - alias for /admin/stats, but requires JWT
@@ -362,6 +379,13 @@ app.post('/api/user/register', express.json(), async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
   }
+});
+
+app.put('/api/user/profile', authenticateJWT, express.json(), async (req, res) => {
+  const userId = req.user.id;
+  const { name, email } = req.body;
+  await pool.query('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, userId]);
+  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
