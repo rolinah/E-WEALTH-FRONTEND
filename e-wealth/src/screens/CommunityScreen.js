@@ -1,144 +1,109 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
-
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
-import XPProgressBar from '../components/XPProgressBar';
-import Badge from '../components/Badge';
-import { useAuth } from '../contexts/AuthContext';
-
-const defaultAvatar = require('../../assets/images/icon.png');
+import { Colors } from '../../constants/Colors';
 
 export default function CommunityScreen() {
-  const { user } = useAuth();
-  const [chats, setChats] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Gamification state (should be fetched and updated in real-time)
-  const [streak, setStreak] = useState(0);
-  const [xp, setXp] = useState(0);
-  const [maxXp, setMaxXp] = useState(500);
-  const [badges, setBadges] = useState([]);
 
   useEffect(() => {
-    // Fetch community chats
-    api.getCommunity()
-      .then(data => {
-        setChats(data);
+    (async () => {
+      try {
+        const data = await api.getCommunity();
+        setPosts(data);
+      } catch (e) {
+        // handle error
+      } finally {
         setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to load community feed');
-        setLoading(false);
-      });
-    // Fetch gamification data (XP, streak, badges) for the user
-    if (user) {
-      api.getProfile().then(profile => {
-        setXp(profile.xp || 0);
-        setStreak(profile.streak || 0);
-        setBadges(profile.badges || []);
-      });
-    }
-  }, [user]);
+      }
+    })();
+  }, []);
 
-  // Example: Call this when user completes a module or logs in for a new day
-  // setXp(xp + 10); setStreak(streak + 1); setBadges([...badges, { label: 'New Badge' }]);
+  if (loading) {
+    return <View style={styles.loading}><ActivityIndicator size="large" color={Colors.light.accent} /></View>;
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Community</Text>
-
-      {/* Gamification Section */}
-      <View style={styles.gamificationSection}>
-        <Text style={styles.streakText}>🔥 Streak: {streak} days</Text>
-        <XPProgressBar xp={xp} maxXp={maxXp} />
-        <View style={styles.badgesRow}>
-          {badges.length === 0 && <Text style={{ color: '#fff' }}>No badges yet</Text>}
-          {badges.map((badge, idx) => (
-            <Badge key={idx} label={badge.label} icon={badge.icon} />
-          ))}
-        </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Chats</Text>
-      {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />}
-      {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
-      {chats.map((chat, idx) => (
-        <View key={idx} style={styles.chatRow}>
-          <Image source={chat.avatar ? { uri: chat.avatar } : defaultAvatar} style={styles.avatar} />
-          <View style={styles.chatBubble}>
-            <Text style={styles.userName}>{chat.user}</Text>
-            <Text style={styles.message}>{chat.message}</Text>
+      <Text style={styles.subtitle}>See what others are sharing and join the conversation.</Text>
+      <View style={styles.cardList}>
+        {posts.map((post, idx) => (
+          <View key={post.id || idx} style={styles.postCard}>
+            <Text style={styles.postTitle}>{post.title}</Text>
+            <Text style={styles.postContent}>{post.content}</Text>
+            <Text style={styles.postAuthor}>By {post.author || 'Anonymous'}</Text>
           </View>
-        </View>
-      ))}
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
+    backgroundColor: Colors.light.background,
+    alignItems: 'center',
+    padding: 32,
+    paddingTop: 48,
+    minHeight: '100%',
+  },
+  loading: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.light.background,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: 12,
-    color: '#222',
+    fontSize: 28,
+    fontWeight: '700',
+    color: Colors.light.text,
+    marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: 0.2,
   },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 24, marginBottom: 8, color: '#fff', textAlign: 'center' },
-
-  chatRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, width: '100%', maxWidth: 350 },
-  avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
-  chatBubble: { backgroundColor: '#fff', borderRadius: 12, padding: 12, flex: 1 },
-  userName: { fontWeight: 'bold', color: '#222' },
-  message: { color: '#333' },
-  card: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 12,
-    margin: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-  },
-  button: {
-    backgroundColor: '#4F8CFF',
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    margin: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  subtitle: {
     fontSize: 16,
+    color: Colors.light.icon,
+    marginBottom: 28,
+    textAlign: 'center',
+    maxWidth: 400,
+    lineHeight: 22,
   },
-  gamificationSection: {
-    backgroundColor: '#1A2EFF',
+  cardList: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  postCard: {
+    backgroundColor: Colors.light.surface,
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-    alignItems: 'center',
+    padding: 20,
+    marginBottom: 12,
+    width: '100%',
+    maxWidth: 420,
+    alignItems: 'flex-start',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
-  streakText: {
-    color: '#FFD600',
+  postTitle: {
     fontWeight: 'bold',
+    color: Colors.light.text,
     fontSize: 16,
+    marginBottom: 4,
+  },
+  postContent: {
+    color: Colors.light.text,
+    fontSize: 14,
     marginBottom: 8,
   },
-  badgesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 8,
+  postAuthor: {
+    color: Colors.light.accent,
+    fontSize: 13,
+    fontWeight: '600',
   },
 }); 

@@ -1,26 +1,46 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * E-Wealth App Color Palette
+ * Primary: Blue (#1A2EFF)
+ * Accent: Yellow (#FFD600) 
+ * Secondary: Orange (#FF9900)
+ * Background: Dark Navy (#101A3D)
+ * Surface: Card Background (#19224A)
  */
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const primaryBlue = '#1A2EFF';
+const accentYellow = '#FFD600';
+const secondaryOrange = '#FF9900';
+const darkNavy = '#101A3D';
+const cardBackground = '#19224A';
+const white = '#FFFFFF';
+const lightGray = '#E3E6F0';
+const errorRed = '#FF4C4C';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: white,
+    background: darkNavy,
+    tint: accentYellow,
+    icon: lightGray,
+    tabIconDefault: lightGray,
+    tabIconSelected: accentYellow,
+    primary: primaryBlue,
+    secondary: secondaryOrange,
+    accent: accentYellow,
+    surface: cardBackground,
+    error: errorRed,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: white,
+    background: darkNavy,
+    tint: accentYellow,
+    icon: lightGray,
+    tabIconDefault: lightGray,
+    tabIconSelected: accentYellow,
+    primary: primaryBlue,
+    secondary: secondaryOrange,
+    accent: accentYellow,
+    surface: cardBackground,
+    error: errorRed,
   },
 };

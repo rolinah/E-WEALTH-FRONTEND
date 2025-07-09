@@ -1,111 +1,148 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Platform, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Colors } from '../../constants/Colors';
+import { NavigationCard } from '../../components/NavigationCard';
+import { FeaturedCard } from '../../components/FeaturedCard';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const logo = require('../../assets/images/ewealth-logo.png');
   const defaultAvatar = require('../../assets/images/icon.png');
+
+  // Only keep the most important quick links
+  const navigationItems = [
+    { title: 'Interests', route: '/interests' as const, color: Colors.light.accent },
+    { title: 'Topics', route: '/topics-collection' as const, color: Colors.light.primary },
+    { title: 'Dashboard', route: '/topics-dashboard' as const, color: Colors.light.secondary },
+    { title: 'Forum', route: '/forum' as const, color: Colors.light.accent },
+    { title: 'Mentoring', route: '/peer-mentoring' as const, color: Colors.light.primary },
+    { title: 'Progress', route: '/progress-dashboard' as const, color: Colors.light.secondary },
+  ];
+
+  const featuredItems = [
+    { title: 'Leadership Skills', image: defaultAvatar },
+    { title: 'Business Finance', image: defaultAvatar },
+    { title: 'Marketing Strategy', image: defaultAvatar },
+  ];
+
+  // Business topics now link to their respective topic details
+  const topicItems = [
+    { title: 'Finance', color: Colors.light.primary },
+    { title: 'Management', color: Colors.light.accent },
+    { title: 'Marketing', color: Colors.light.secondary },
+    { title: 'Leadership', color: Colors.light.primary },
+  ];
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Section Title */}
-      <Text style={styles.hubTitle}>E-Wealth Hub</Text>
-      <View style={styles.hubAccent} />
-      {/* Navigation Section */}
-      <View style={styles.navSection}>
-        <View style={styles.navGrid}>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#FFD600' }]} onPress={() => router.push('/interests')}>
-            <Text style={styles.navCardText}>Interests Card</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#1A2EFF' }]} onPress={() => router.push('/topics-collection')}>
-            <Text style={styles.navCardText}>Topics Collection</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#FF9900' }]} onPress={() => router.push('/topics-dashboard')}>
-            <Text style={styles.navCardText}>Topics Dashboard</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#FFD600' }]} onPress={() => router.push('/forum')}>
-            <Text style={styles.navCardText}>Forum</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#1A2EFF' }]} onPress={() => router.push('/peer-mentoring')}>
-            <Text style={styles.navCardText}>Peer Mentoring</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#FF9900' }]} onPress={() => router.push('/progress-dashboard')}>
-            <Text style={styles.navCardText}>Progress Dashboard</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navCard, { borderLeftColor: '#FFD600' }]} onPress={() => router.push('/skill-gap-analysis')}>
-            <Text style={styles.navCardText}>Skill Gap Analysis</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        {/* Logo Section */}
+        <View style={styles.logoSection}>
+          <Image source={logo} style={styles.logo} />
+          <Text style={styles.appTitle}>E-Wealth</Text>
+          <Text style={styles.appSubtitle}>Empowering Business Growth</Text>
         </View>
-      </View>
-      {/* Featured Content */}
-      <Text style={styles.sectionTitle}>Continue Learning</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-        <TouchableOpacity style={styles.featuredCard}>
-          <Image source={defaultAvatar} style={styles.featuredImage} />
-          <Text style={styles.featuredText}>Learn to Lead</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.featuredCard}>
-          <Image source={defaultAvatar} style={styles.featuredImage} />
-          <Text style={styles.featuredText}>New Content</Text>
-        </TouchableOpacity>
-        {/* Add more featured cards as needed */}
+        {/* Navigation Section */}
+        <View style={styles.navSection}>
+          <Text style={styles.sectionTitle}>Quick Access</Text>
+          <View style={styles.navGrid}>
+            {navigationItems.map((item, index) => (
+              <NavigationCard
+                key={index}
+                title={item.title}
+                onPress={() => router.push(item.route)}
+                borderColor={item.color}
+              />
+            ))}
+          </View>
+        </View>
+        {/* Featured Content */}
+        <View style={styles.featuredSection}>
+          <Text style={styles.sectionTitle}>Continue Learning</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            {featuredItems.map((item, index) => (
+              <FeaturedCard
+                key={index}
+                title={item.title}
+                imageSource={item.image}
+              />
+            ))}
+          </ScrollView>
+        </View>
+        {/* Business Topics Section */}
+        <View style={styles.topicsSection}>
+          <Text style={styles.sectionTitle}>Business Topics</Text>
+          <View style={styles.cardList}>
+            {topicItems.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.topicCard, { backgroundColor: item.color }]}
+                onPress={() => router.push({ pathname: '/topic-details', params: { topic: item.title } })}
+              >
+                <Text style={[
+                  styles.topicTitle,
+                  item.color === Colors.light.accent && { color: Colors.light.background }
+                ]}>
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       </ScrollView>
-      {/* Business Topics Section */}
-      <Text style={styles.sectionTitle}>Business Topics</Text>
-      <View style={styles.cardList}>
-        <TouchableOpacity style={[styles.topicCard, { backgroundColor: '#1A2EFF' }]} onPress={() => router.push('/topics-collection')}>
-          <Text style={styles.topicTitle}>Business Finances</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.topicCard, { backgroundColor: '#FFD600' }]} onPress={() => router.push('/topics-collection')}>
-          <Text style={[styles.topicTitle, { color: '#1A2EFF' }]}>Startup Management</Text>
-        </TouchableOpacity>
-        {/* Add more topics as needed */}
-      </View>
-      {/* Learning Features */}
-      <Text style={styles.sectionTitle}>Learning Features</Text>
-      <View style={styles.cardList}>
-        <TouchableOpacity style={[styles.featureCard, { borderLeftColor: '#FFD600' }]} onPress={() => router.push('/skill-gap-analysis')}>
-          <Text style={styles.featureTitle}>Skill Gap Analysis</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.featureCard, { borderLeftColor: '#1A2EFF' }]} onPress={() => router.push('/progress-dashboard')}>
-          <Text style={styles.featureTitle}>Progress Dashboard</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.featureCard, { borderLeftColor: '#FF9900' }]} onPress={() => router.push('/forum')}>
-          <Text style={styles.featureTitle}>Forum</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.featureCard, { borderLeftColor: '#FFD600' }]} onPress={() => router.push('/peer-mentoring')}>
-          <Text style={styles.featureTitle}>Peer Mentoring</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#101A3D' },
-  contentContainer: { alignItems: 'center', paddingBottom: 32 },
-  hubTitle: {
-    color: '#fff',
-    fontSize: 28,
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+  },
+  container: { 
+    flex: 1, 
+    backgroundColor: Colors.light.background 
+  },
+  contentContainer: { 
+    paddingBottom: 32 
+  },
+  logoSection: {
+    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 24,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    marginBottom: 12,
+    resizeMode: 'contain',
+  },
+  appTitle: {
+    color: Colors.light.text,
+    fontSize: 32,
     fontWeight: 'bold',
     letterSpacing: 2,
     fontFamily: Platform.OS === 'ios' ? 'AvenirNext-Bold' : 'sans-serif-condensed',
-    marginTop: 24,
-    textAlign: 'center',
+    marginBottom: 4,
   },
-  hubAccent: {
-    width: 60,
-    height: 5,
-    backgroundColor: '#FFD600',
-    borderRadius: 3,
-    marginTop: 6,
-    marginBottom: 18,
-    alignSelf: 'center',
+  appSubtitle: {
+    color: Colors.light.icon,
+    fontSize: 16,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   navSection: {
-    marginTop: 0,
-    marginBottom: 18,
-    width: '92%',
-    alignSelf: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.light.accent,
+    marginBottom: 16,
+    marginLeft: 4,
   },
   navGrid: {
     flexDirection: 'row',
@@ -113,105 +150,53 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   navCard: {
-    backgroundColor: '#19224A',
-    borderRadius: 14,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    marginBottom: 14,
-    width: '48%',
+    backgroundColor: Colors.light.surface,
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    width: '48%', // Ensures two cards per row
     alignItems: 'center',
-    elevation: 2,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    borderLeftWidth: 6,
-    borderLeftColor: '#FFD600',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    borderLeftWidth: 4,
   },
-  navCardText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-    letterSpacing: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFD600',
-    marginTop: 16,
-    marginBottom: 8,
-    alignSelf: 'flex-start',
-    marginLeft: '4%',
+  featuredSection: {
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
   horizontalScroll: {
-    marginBottom: 16,
-    width: '92%',
-    alignSelf: 'center',
+    marginBottom: 8,
   },
-  featuredCard: {
-    backgroundColor: '#19224A',
-    borderRadius: 12,
-    marginRight: 12,
-    width: 140,
-    alignItems: 'center',
-    padding: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-  },
-  featuredImage: {
-    width: 120,
-    height: 70,
-    borderRadius: 8,
-    marginBottom: 6,
-  },
-  featuredText: {
-    fontWeight: 'bold',
-    color: '#FFD600',
-    fontSize: 14,
+  topicsSection: {
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
   cardList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 8,
-    width: '92%',
-    alignSelf: 'center',
   },
   topicCard: {
-    backgroundColor: '#1A2EFF',
-    borderRadius: 12,
-    padding: 18,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 12,
     width: '48%',
     alignItems: 'center',
-    elevation: 2,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   topicTitle: {
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.light.text,
     fontSize: 16,
+    textAlign: 'center',
   },
-  featureCard: {
-    backgroundColor: '#19224A',
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 12,
-    width: '48%',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    borderLeftWidth: 6,
-    borderLeftColor: '#FFD600',
-  },
-  featureTitle: {
-    fontWeight: 'bold',
-    color: '#FFD600',
-    fontSize: 16,
+  featuresSection: {
+    paddingHorizontal: 20,
   },
 });
