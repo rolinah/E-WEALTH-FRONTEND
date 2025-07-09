@@ -207,11 +207,14 @@ app.post('/badges/:userId', express.json(), async (req, res) => {
 });
 
 // Signup
+// IMPORTANT: Admin registration requires ADMIN_SECRET in your .env file
+// Only users with the correct adminSecret can register as admin
 app.post('/auth/signup', express.json(), async (req, res) => {
   const { email, password, name, role, adminSecret } = req.body;
+  // Enforce adminSecret for admin registration
   if (role === 'admin') {
     if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
-      return res.status(403).json({ error: 'Invalid or missing admin secret' });
+      return res.status(403).json({ error: 'Admin registration requires a valid admin secret key.' });
     }
   }
   const hash = await bcrypt.hash(password, 10);
@@ -346,9 +349,10 @@ app.get('/api/admin/stats', authenticateJWT, async (req, res) => {
 // /api/user/register (POST) - alias for /auth/signup
 app.post('/api/user/register', express.json(), async (req, res) => {
   const { email, password, name, role, adminSecret } = req.body;
+  // Enforce adminSecret for admin registration
   if (role === 'admin') {
     if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
-      return res.status(403).json({ error: 'Invalid or missing admin secret' });
+      return res.status(403).json({ error: 'Admin registration requires a valid admin secret key.' });
     }
   }
   const hash = await bcrypt.hash(password, 10);
