@@ -1,30 +1,52 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: theme.accent,
+        tabBarInactiveTintColor: theme.icon,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarBackground: () => (
+          <View style={{ backgroundColor: theme.surface, borderTopColor: theme.accent, borderTopWidth: 1, flex: 1 }} />
+        ),
         tabBarStyle: Platform.select({
           ios: {
             position: 'absolute',
+            backgroundColor: theme.surface,
+            borderTopColor: theme.accent,
+            borderTopWidth: 1,
+            height: 64,
+            shadowColor: '#000',
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
           },
-          default: {},
+          default: {
+            backgroundColor: theme.surface,
+            borderTopColor: theme.accent,
+            borderTopWidth: 1,
+            height: 64,
+            elevation: 8,
+          },
         }),
-      }}>
+        tabBarLabelStyle: {
+          fontWeight: '600',
+          fontSize: 12,
+          letterSpacing: 0.5,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -33,10 +55,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="topics-collection"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />, 
+          title: 'Topics',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />, 
         }}
       />
       <Tabs.Screen
@@ -47,17 +69,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />, 
-        }}
-      />
-      <Tabs.Screen
-        name="admin"
-        options={{
-          title: 'Admin',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="lock.shield.fill" color={color} />, 
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />, 
         }}
       />
     </Tabs>

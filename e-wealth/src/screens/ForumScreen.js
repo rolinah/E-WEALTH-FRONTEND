@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import io from 'socket.io-client';
+import { Colors } from '../../constants/Colors';
 
 const SOCKET_SERVER_URL = 'http://localhost:3000'; // Change if your server runs elsewhere
 
@@ -50,6 +51,7 @@ export default function ForumScreen() {
               value={tempUsername}
               onChangeText={setTempUsername}
               placeholder="Username"
+              placeholderTextColor={Colors.light.icon}
               autoFocus
             />
             <TouchableOpacity style={styles.sendButton} onPress={handleSetUsername}>
@@ -76,6 +78,7 @@ export default function ForumScreen() {
           value={input}
           onChangeText={setInput}
           placeholder="Type your message..."
+          placeholderTextColor={Colors.light.icon}
         />
         <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
           <Text style={styles.sendButtonText}>Send</Text>
@@ -88,33 +91,35 @@ export default function ForumScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.background,
     padding: 24,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     margin: 12,
-    color: '#222',
+    color: Colors.light.text,
     textAlign: 'center',
   },
   messageBubble: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.light.surface,
     borderRadius: 12,
     padding: 10,
     marginVertical: 4,
     marginHorizontal: 8,
     alignSelf: 'flex-start',
     maxWidth: '80%',
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.light.accent,
   },
   username: {
-    color: '#4F8CFF',
+    color: Colors.light.primary,
     fontWeight: 'bold',
     fontSize: 14,
     marginBottom: 2,
   },
   messageText: {
-    color: '#222',
+    color: Colors.light.text,
     fontSize: 16,
   },
   inputRow: {
@@ -125,23 +130,24 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.light.surface,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: Colors.light.icon,
+    color: Colors.light.text,
   },
   sendButton: {
-    backgroundColor: '#4F8CFF',
+    backgroundColor: Colors.light.accent,
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 18,
     alignItems: 'center',
   },
   sendButtonText: {
-    color: '#fff',
+    color: Colors.light.background,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -152,7 +158,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -162,6 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#222',
+    color: Colors.light.text,
   },
 }); 
