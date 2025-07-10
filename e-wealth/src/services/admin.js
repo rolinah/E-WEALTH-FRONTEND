@@ -28,9 +28,7 @@ export async function uploadAdminTopicWithVideo(title, description, videoFile, t
     const res = await fetch('http://localhost:3000/admin/upload-module', {
       method: 'POST',
       body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      // Do NOT set Content-Type manually! Let the browser set it.
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Upload failed');
     return await res.json();

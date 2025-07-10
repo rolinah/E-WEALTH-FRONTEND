@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 
 export default function AdminScreen() {
+  const { signOut } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -84,8 +85,8 @@ export default function AdminScreen() {
     }
     setUploading(true);
     try {
-      await uploadAdminTopicWithVideo(topicTitle, topicDesc, video, topicId);
-      Alert.alert('Success', 'Topic and video uploaded!');
+      const result = await uploadAdminTopicWithVideo(topicTitle, topicDesc, video, topicId);
+      Alert.alert('Success', result.message || 'Topic and video uploaded!');
       setTopicTitle('');
       setTopicDesc('');
       setVideo(null);

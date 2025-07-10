@@ -31,8 +31,8 @@ export default function AdminContentManagerScreen() {
     }
     setLoading(true);
     try {
-      await uploadAdminTopicWithVideo(topicTitle, topicDesc, video);
-      Alert.alert('Success', 'Topic and video uploaded!');
+      const result = await uploadAdminTopicWithVideo(topicTitle, topicDesc, video);
+      Alert.alert('Success', result.message || 'Topic and video uploaded!');
       setTopicTitle('');
       setTopicDesc('');
       setVideo(null);
