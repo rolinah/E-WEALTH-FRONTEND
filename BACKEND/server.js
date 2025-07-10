@@ -7,6 +7,8 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -124,6 +126,15 @@ ensureBadgesTable();
 (async function ensureUserRoleColumn() {
   try {
     await pool.query("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+})();
+
+// Ensure users table has 'bio' column
+(async function ensureUserBioColumn() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN bio TEXT");
   } catch (e) {
     // Ignore error if column already exists
   }
@@ -290,7 +301,7 @@ app.get('/admin/stats', async (req, res) => {
   }
 });
 
-// JWT authentication middleware for /api endpoints
+// Middleware to authenticate JWT for /api endpoints
 function authenticateJWT(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: 'No token' });
@@ -302,6 +313,41 @@ function authenticateJWT(req, res, next) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
+
+// Update user profile (name, email, bio, password)
+app.put('/api/user/profile', authenticateJWT, express.json(), async (req, res) => {
+  const userId = req.user.id;
+  const { name, email, bio, password } = req.body;
+  let updateFields = [];
+  let updateValues = [];
+  if (name) {
+    updateFields.push('name = ?');
+    updateValues.push(name);
+  }
+  if (email) {
+    updateFields.push('email = ?');
+    updateValues.push(email);
+  }
+  if (bio !== undefined) {
+    updateFields.push('bio = ?');
+    updateValues.push(bio);
+  }
+  if (password) {
+    const hash = await bcrypt.hash(password, 10);
+    updateFields.push('password = ?');
+    updateValues.push(hash);
+  }
+  if (updateFields.length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+  updateValues.push(userId);
+  try {
+    await pool.query(`UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`, updateValues);
+    res.json({ success: true, message: 'Profile updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update profile', details: err.message });
+  }
+});
 
 // /api/user/profile (GET) - alias for /profile, but requires JWT
 app.get('/api/user/profile', authenticateJWT, async (req, res) => {
@@ -365,5 +411,37 @@ app.post('/api/user/register', express.json(), async (req, res) => {
   }
 });
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+io.on('connection', async (socket) => {
+  console.log('A user connected');
+  // Send recent messages to the newly connected client
+  try {
+    const [rows] = await pool.query('SELECT * FROM posts ORDER BY created_at DESC LIMIT 50');
+    // Send in chronological order
+    socket.emit('chat history', rows.reverse());
+  } catch (err) {
+    console.error('Error fetching chat history:', err);
+  }
+  socket.on('chat message', async (msg) => {
+    io.emit('chat message', msg);
+    // Save to database
+    try {
+      await pool.query('INSERT INTO posts (user_id, content) VALUES (?, ?)', [msg.username || 'anonymous', msg.text]);
+    } catch (err) {
+      console.error('Error saving chat message:', err);
+    }
+  });
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

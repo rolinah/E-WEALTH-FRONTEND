@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -16,7 +17,8 @@ export default function LoginScreen() {
     }
     setLoading(true);
     try {
-      await api.signIn(email, password);
+      await signIn(email, password);
+      // Navigation will be handled by AuthContext
     } catch (error) {
       Alert.alert('Login Failed', error.message);
     } finally {

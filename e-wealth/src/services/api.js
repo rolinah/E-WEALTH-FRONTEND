@@ -1,7 +1,8 @@
 // api.js
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import storage from './storage';
 
-const BACKEND_URL = 'http://10.4.60.116:3000';
+// Use environment variable or fallback to localhost
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
 export const api = {
   // Authentication
@@ -11,7 +12,10 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Signup failed');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Signup failed');
+    }
     return await res.json();
   },
   signIn: async (email, password) => {
@@ -20,19 +24,22 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Login failed');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Login failed');
+    }
     const data = await res.json();
-    await AsyncStorage.setItem('jwt', data.token);
-    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+    await storage.setItem('jwt', data.token);
+    await storage.setItem('user', JSON.stringify(data.user));
     return data.user;
   },
   signOut: async () => {
-    await AsyncStorage.removeItem('jwt');
-    await AsyncStorage.removeItem('user');
+    await storage.removeItem('jwt');
+    await storage.removeItem('user');
   },
   getCurrentUser: async () => {
     try {
-      const user = await AsyncStorage.getItem('user');
+      const user = await storage.getItem('user');
       return user ? JSON.parse(user) : null;
     } catch (error) {
       console.error('Error getting current user:', error);
@@ -40,17 +47,20 @@ export const api = {
     }
   },
   getProfile: async () => {
-    const token = await AsyncStorage.getItem('jwt');
+    const token = await storage.getItem('jwt');
     if (!token) throw new Error('Not authenticated');
     const res = await fetch(`${BACKEND_URL}/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch profile');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to fetch profile');
+    }
     return await res.json();
   },
   getTopics: async () => {
     try {
-      const token = await AsyncStorage.getItem('jwt');
+      const token = await storage.getItem('jwt');
       if (!token) {
         // Return mock data for development
         return [
@@ -87,7 +97,10 @@ export const api = {
       const res = await fetch(`${BACKEND_URL}/api/topics`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch topics');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch topics');
+      }
       return await res.json();
     } catch (error) {
       console.error('Error fetching topics:', error);
@@ -113,7 +126,10 @@ export const api = {
   getAdminData: async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/admin/stats`);
-      if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch admin stats');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch admin stats');
+      }
       return await res.json();
     } catch (error) {
       console.error('Error fetching admin data:', error);
@@ -123,7 +139,10 @@ export const api = {
   getCommunity: async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/posts`);
-      if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch community posts');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch community posts');
+      }
       return await res.json();
     } catch (error) {
       console.error('Error fetching community posts:', error);

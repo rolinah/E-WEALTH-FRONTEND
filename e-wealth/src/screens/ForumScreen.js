@@ -1,7 +1,7 @@
 // ForumScreen.js
 // Screen for discussion forums and Q&A boards per business topic.
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Modal, Keyboard } from 'react-native';
 import io from 'socket.io-client';
 import { Colors } from '../../constants/Colors';
 
@@ -14,12 +14,18 @@ export default function ForumScreen() {
   const [usernameModal, setUsernameModal] = useState(true);
   const [tempUsername, setTempUsername] = useState('');
   const socketRef = useRef(null);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     if (!username) return;
     socketRef.current = io(SOCKET_SERVER_URL);
     socketRef.current.on('chat message', (msg) => {
       setMessages((prev) => [...prev, msg]);
+      flatListRef.current?.scrollToEnd({ animated: true });
+    });
+    socketRef.current.on('chat history', (history) => {
+      setMessages(history.map(m => ({ username: m.user_id, text: m.content })));
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 100);
     });
     return () => {
       socketRef.current.disconnect();
@@ -30,6 +36,7 @@ export default function ForumScreen() {
     if (input.trim() && username) {
       socketRef.current.emit('chat message', { username, text: input });
       setInput('');
+      Keyboard.dismiss();
     }
   };
 
@@ -41,7 +48,7 @@ export default function ForumScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={80}>
       <Modal visible={usernameModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -62,6 +69,7 @@ export default function ForumScreen() {
       </Modal>
       <Text style={styles.title}>Discussion Forum</Text>
       <FlatList
+        ref={flatListRef}
         data={messages}
         keyExtractor={(_, idx) => idx.toString()}
         renderItem={({ item }) => (
@@ -71,6 +79,7 @@ export default function ForumScreen() {
           </View>
         )}
         contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
       <View style={styles.inputRow}>
         <TextInput
@@ -79,6 +88,7 @@ export default function ForumScreen() {
           onChangeText={setInput}
           placeholder="Type your message..."
           placeholderTextColor={Colors.light.icon}
+          onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
         />
         <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
           <Text style={styles.sendButtonText}>Send</Text>

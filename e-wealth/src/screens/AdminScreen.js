@@ -6,6 +6,7 @@ import { uploadAdminTopicWithVideo } from '../services/admin';
 import { AppState } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { Colors } from '../../constants/Colors';
 
 export default function AdminScreen() {
   const { signOut } = useAuth();
@@ -278,7 +279,7 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#8F5FFF',
+    backgroundColor: Colors.light.background,
     justifyContent: 'center',
     alignItems: 'center',
   },

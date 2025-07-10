@@ -1,10 +1,11 @@
 {
   "dependencies": {
+    "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "axios": "^1.10.0",
     "expo-av": "~15.1.7",
     "react-dom": "19.0.0",
     "react-native-web": "^0.20.0",
-    "@expo/metro-runtime": "~5.0.4"
+    "socket.io": "^4.8.1"
   }
 }

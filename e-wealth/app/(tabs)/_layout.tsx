@@ -62,10 +62,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="community"
+        name="achievements"
         options={{
-          title: 'Community',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />, 
+          title: 'Achievements',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="trophy.fill" color={color} />, 
         }}
       />
       <Tabs.Screen

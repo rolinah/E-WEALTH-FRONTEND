@@ -9,7 +9,7 @@ export const NavigationHelper = {
   // Main App
   goToHome: (navigation) => navigation.navigate('(tabs)'),
   goToProfile: (navigation) => navigation.navigate('(tabs)', { screen: 'profile' }),
-  goToCommunity: (navigation) => navigation.navigate('(tabs)', { screen: 'community' }),
+  goToAchievements: (navigation) => navigation.navigate('(tabs)', { screen: 'achievements' }),
   goToSettings: (navigation) => navigation.navigate('(tabs)', { screen: 'settings' }),
   goToAdmin: (navigation) => navigation.navigate('(tabs)', { screen: 'admin' }),
   

@@ -56,16 +56,18 @@ This document provides a comprehensive overview of all screens in the E-Wealth a
 - **Navigation**:
   - → Logout (returns to auth)
 
-### 5. Community Screen (`/(tabs)/community`)
-- **File**: `src/screens/CommunityScreen.js`
-- **Route**: `app/(tabs)/community.tsx`
+### 5. Achievements Screen (`/(tabs)/achievements`)
+- **File**: `src/screens/AchievementsScreen.js`
+- **Route**: `app/(tabs)/achievements.tsx`
 - **Functionality**:
-  - Community posts display
-  - Social interactions
-  - Learning from others
+  - View learning streaks
+  - See earned badges
+  - Track XP progress
+  - Celebrate milestones
 - **Navigation**:
-  - → Create new post
-  - → View post details
+  - → Home
+  - → Profile
+  - → Settings
 
 ### 6. Settings Screen (`/(tabs)/settings`)
 - **File**: `src/screens/SettingsScreen.js`
@@ -210,7 +212,7 @@ App Root
 ├── Main App (Tabs)
 │   ├── Home (/(tabs)/index)
 │   ├── Profile (/(tabs)/profile)
-│   ├── Community (/(tabs)/community)
+│   ├── Achievements (/(tabs)/achievements)
 │   ├── Settings (/(tabs)/settings)
 │   └── Admin (/(tabs)/admin)
 ├── Learning Screens
