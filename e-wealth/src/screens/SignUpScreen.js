@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { api } from '../services/api';
+import { useRouter } from 'expo-router';
+import { Colors } from '../../constants/Colors';
+import { useAuth } from '../contexts/AuthContext';
 
-export default function SignUpScreen({ navigation }) {
+export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/'); // Redirect to home if already logged in
+    }
+  }, [isAuthenticated]);
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword || !name) {
@@ -24,13 +35,11 @@ export default function SignUpScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      const userCredential = await api.signUp(email, password);
-      await api.createUserProfile(userCredential.uid, {
-        name,
-        email,
-        displayName: name
-      });
+      await api.signUp(email, password, name);
+      // If your backend does not require createUserProfile, remove or comment out the next line:
+      // await api.createUserProfile(userCredential.uid, { name, email, displayName: name });
       Alert.alert('Success', 'Account created successfully!');
+      router.push('/auth/login');
     } catch (error) {
       Alert.alert('Sign Up Failed', error.message);
     } finally {
@@ -75,7 +84,7 @@ export default function SignUpScreen({ navigation }) {
         <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => router.push('/auth/login')}>
           <Text style={styles.link}>Already have an account? Log in</Text>
         </TouchableOpacity>
       </View>
@@ -86,13 +95,13 @@ export default function SignUpScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
     borderRadius: 12,
     padding: 24,
     width: 340,
@@ -107,27 +116,27 @@ const styles = StyleSheet.create({
     height: 80,
     marginBottom: 16,
     borderRadius: 40,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     margin: 12,
-    color: '#222',
+    color: Colors.light.text,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
     width: '100%',
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#eee',
-    color: '#222',
+    borderColor: Colors.light.icon,
+    color: Colors.light.text,
   },
   button: {
-    backgroundColor: '#222',
+    backgroundColor: Colors.light.primary,
     borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 32,
@@ -140,12 +149,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   buttonText: {
-    color: '#fff',
+    color: Colors.light.background,
     fontWeight: 'bold',
     fontSize: 16,
   },
   link: {
-    color: '#222',
+    color: Colors.light.primary,
     textAlign: 'center',
     marginTop: 8,
     fontSize: 15,

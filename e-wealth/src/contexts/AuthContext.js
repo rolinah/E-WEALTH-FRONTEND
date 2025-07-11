@@ -13,11 +13,17 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(api.getCurrentUser());
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUser(api.getCurrentUser());
+    // On mount, check AsyncStorage for user
+    (async () => {
+      setLoading(true);
+      const currentUser = await api.getCurrentUser();
+      setUser(currentUser);
+      setLoading(false);
+    })();
   }, []);
 
   useEffect(() => {
@@ -82,6 +88,11 @@ export const AuthProvider = ({ children }) => {
     getProfile,
     isAuthenticated: !!user,
   };
+
+  if (loading) {
+    // Optionally, show a splash/loading screen here
+    return null;
+  }
 
   return (
     <AuthContext.Provider value={value}>

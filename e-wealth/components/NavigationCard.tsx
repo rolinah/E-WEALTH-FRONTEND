@@ -12,8 +12,8 @@ interface NavigationCardProps {
 export const NavigationCard: React.FC<NavigationCardProps> = ({
   title,
   onPress,
-  borderColor,
-  backgroundColor = Colors.light.surface,
+  borderColor, // unused in new design
+  backgroundColor = 'rgba(255,255,255,0.08)', // lighter, semi-transparent
 }) => {
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -40,10 +40,7 @@ export const NavigationCard: React.FC<NavigationCardProps> = ({
       <TouchableOpacity
         style={[
           styles.card,
-          { 
-            borderLeftColor: borderColor,
-            backgroundColor: backgroundColor
-          }
+          { backgroundColor: backgroundColor }
         ]}
         onPress={onPress}
         activeOpacity={0.8}
@@ -59,22 +56,23 @@ export const NavigationCard: React.FC<NavigationCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    width: '48%',
+    borderRadius: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 10,
+    marginBottom: 18,
+    width: '47%', // two columns
     alignItems: 'center',
-    elevation: 4,
+    justifyContent: 'center',
+    elevation: 6,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    borderLeftWidth: 4,
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    marginHorizontal: '1.5%',
   },
   cardText: {
     color: Colors.light.text,
-    fontWeight: '600',
-    fontSize: 16,
+    fontWeight: 'bold',
+    fontSize: 18,
     letterSpacing: 0.5,
     textAlign: 'center',
   },

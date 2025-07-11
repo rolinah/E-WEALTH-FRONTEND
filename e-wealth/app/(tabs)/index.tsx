@@ -40,7 +40,7 @@ export default function HomeScreen() {
         {/* Logo Section */}
         <View style={styles.logoSection}>
           <Image source={logo} style={styles.logo} />
-          <Text style={styles.appTitle}>E-Wealth</Text>
+          {/* Removed the large E-Wealth text to avoid redundancy */}
           <Text style={styles.appSubtitle}>Empowering Business Growth</Text>
         </View>
         {/* Navigation Section */}

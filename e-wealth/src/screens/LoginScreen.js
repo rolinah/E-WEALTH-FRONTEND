@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { api } from '../services/api';
 import { useRouter } from 'expo-router';
+import { Colors } from '../../constants/Colors';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/'); // Redirect to home if already logged in
+    }
+  }, [isAuthenticated]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -36,6 +45,7 @@ export default function LoginScreen() {
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          placeholderTextColor={Colors.light.icon}
         />
         <TextInput 
           style={styles.input} 
@@ -43,6 +53,7 @@ export default function LoginScreen() {
           secureTextEntry 
           value={password}
           onChangeText={setPassword}
+          placeholderTextColor={Colors.light.icon}
         />
         <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Loading...' : 'Login'}</Text>
@@ -58,13 +69,13 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
     borderRadius: 12,
     padding: 24,
     width: 340,
@@ -79,27 +90,27 @@ const styles = StyleSheet.create({
     height: 80,
     marginBottom: 16,
     borderRadius: 40,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     margin: 12,
-    color: '#222',
+    color: Colors.light.text,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light.surface,
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
     width: '100%',
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#eee',
-    color: '#222',
+    borderColor: Colors.light.icon,
+    color: Colors.light.text,
   },
   button: {
-    backgroundColor: '#222',
+    backgroundColor: Colors.light.primary,
     borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 32,
@@ -112,12 +123,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   buttonText: {
-    color: '#fff',
+    color: Colors.light.background,
     fontWeight: 'bold',
     fontSize: 16,
   },
   link: {
-    color: '#222',
+    color: Colors.light.primary,
     textAlign: 'center',
     marginTop: 8,
     fontSize: 15,
