@@ -23,6 +23,34 @@ export default function TopicDetailsScreen({ route, navigation }) {
     );
   }
 
+  // Example resources (replace with dynamic data as needed)
+  const exampleResources = [
+    {
+      type: 'Book',
+      title: 'Financial Intelligence',
+      author: 'Karen Berman & Joe Knight',
+      url: 'https://www.amazon.com/Financial-Intelligence-Managers-Really-Business/dp/1422144119',
+    },
+    {
+      type: 'Document',
+      title: 'Business Finance Basics (PDF)',
+      author: 'OpenLearn',
+      url: 'https://www.open.edu/openlearn/money-business/business-studies/introduction-business-finance/content-section-0?active-tab=description-tab',
+    },
+    {
+      type: 'Article',
+      title: 'Understanding Startup Management',
+      author: 'Harvard Business Review',
+      url: 'https://hbr.org/2020/01/the-right-way-to-lead-design-thinking',
+    },
+    {
+      type: 'Video',
+      title: 'Digital Marketing Strategies Explained',
+      author: 'YouTube - Neil Patel',
+      url: 'https://www.youtube.com/watch?v=HNd0bPzY1rs',
+    },
+  ];
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -61,6 +89,28 @@ export default function TopicDetailsScreen({ route, navigation }) {
           <Text style={styles.placeholderText}>Introduction video will appear here</Text>
           <Text style={styles.placeholderSubtext}>Learn about this topic</Text>
         </View>
+      </View>
+
+      <View style={styles.resourcesSection}>
+        <Text style={styles.sectionTitle}>Books & Learning Materials</Text>
+        {exampleResources.map((res, idx) => (
+          <TouchableOpacity
+            key={idx}
+            style={styles.resourceCard}
+            onPress={() => {
+              // Open the resource URL (add Linking if needed)
+              if (res.url) {
+                // Use Linking API to open the URL
+                import('react-native').then(({ Linking }) => Linking.openURL(res.url));
+              }
+            }}
+          >
+            <Text style={styles.resourceType}>{res.type}</Text>
+            <Text style={styles.resourceTitle}>{res.title}</Text>
+            <Text style={styles.resourceAuthor}>{res.author}</Text>
+            <Text style={styles.resourceLink}>View</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </ScrollView>
   );
@@ -168,5 +218,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
     textAlign: 'center'
-  }
+  },
+  resourcesSection: {
+    padding: 20,
+  },
+  resourceCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    elevation: 1,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFD600',
+  },
+  resourceType: {
+    fontSize: 12,
+    color: '#FFD600',
+    fontWeight: 'bold',
+  },
+  resourceTitle: {
+    fontSize: 16,
+    color: '#222',
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
+  resourceAuthor: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 4,
+  },
+  resourceLink: {
+    color: '#4F8CFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
 });

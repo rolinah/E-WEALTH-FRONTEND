@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { api } from '../services/api';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, Switch } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
-import { useAuth } from '../contexts/AuthContext';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
@@ -11,14 +10,10 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminSecret, setAdminSecret] = useState('');
+  const { signUp } = useAuth();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/'); // Redirect to home if already logged in
-    }
-  }, [isAuthenticated]);
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword || !name) {
@@ -33,13 +28,15 @@ export default function SignUpScreen() {
       Alert.alert('Error', 'Password must be at least 6 characters long');
       return;
     }
+    if (isAdmin && !adminSecret) {
+      Alert.alert('Error', 'Admin secret is required for admin registration');
+      return;
+    }
     setLoading(true);
     try {
-      await api.signUp(email, password, name);
-      // If your backend does not require createUserProfile, remove or comment out the next line:
-      // await api.createUserProfile(userCredential.uid, { name, email, displayName: name });
+      await signUp(email, password, { name, role: isAdmin ? 'admin' : undefined, adminSecret: isAdmin ? adminSecret : undefined });
       Alert.alert('Success', 'Account created successfully!');
-      router.push('/auth/login');
+      // Navigation will be handled by AuthContext
     } catch (error) {
       Alert.alert('Sign Up Failed', error.message);
     } finally {
@@ -54,7 +51,7 @@ export default function SignUpScreen() {
         <Text style={styles.title}>Sign Up</Text>
         <TextInput 
           style={styles.input} 
-          placeholder="Full Name" 
+          placeholder="Name" 
           value={name}
           onChangeText={setName}
           autoCapitalize="words"
@@ -81,6 +78,19 @@ export default function SignUpScreen() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
+        <View style={styles.adminRow}>
+          <Text style={styles.adminLabel}>Register as Admin</Text>
+          <Switch value={isAdmin} onValueChange={setIsAdmin} />
+        </View>
+        {isAdmin && (
+          <TextInput
+            style={styles.input}
+            placeholder="Admin Secret"
+            value={adminSecret}
+            onChangeText={setAdminSecret}
+            secureTextEntry
+          />
+        )}
         <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
         </TouchableOpacity>
@@ -158,5 +168,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     fontSize: 15,
+  },
+  adminRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    justifyContent: 'space-between',
+  },
+  adminLabel: {
+    fontSize: 15,
+    color: '#222',
+    marginRight: 8,
   },
 });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { Video } from 'expo-av';
+import { Colors } from '../../constants/Colors';
 
 const settingsOptions = [
   { name: 'Theme', icon: require('../../assets/images/icon.png') },
@@ -66,7 +67,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#4F8CFF',
+    backgroundColor: Colors.light.background,
     alignItems: 'center',
     padding: 24,
     position: 'relative',

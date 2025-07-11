@@ -17,13 +17,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // On mount, check AsyncStorage for user
-    (async () => {
-      setLoading(true);
-      const currentUser = await api.getCurrentUser();
-      setUser(currentUser);
-      setLoading(false);
-    })();
+    const initializeUser = async () => {
+      try {
+        const currentUser = await api.getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Error initializing user:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeUser();
   }, []);
 
   useEffect(() => {
