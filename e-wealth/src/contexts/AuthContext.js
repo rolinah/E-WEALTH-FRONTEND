@@ -19,8 +19,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        const currentUser = await api.getCurrentUser();
-        setUser(currentUser);
+        // const currentUser = await api.getCurrentUser();
+        // setUser(currentUser);
+        setUser(null); // Always force unauthenticated on app start
       } catch (error) {
         console.error('Error initializing user:', error);
         setUser(null);
