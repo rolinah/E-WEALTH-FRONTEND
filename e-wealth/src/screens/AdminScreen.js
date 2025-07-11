@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, TouchableOpacity, FlatList, Picker } from 'react-native';
 import { api } from '../services/api';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadAdminTopicWithVideo } from '../services/admin';
@@ -7,6 +7,40 @@ import { AppState } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
+
+function printCertificate({ userName, moduleName }) {
+  const date = new Date().toLocaleDateString();
+  const html = `
+    <html>
+      <head>
+        <title>Certificate of Completion</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+          .cert { border: 6px solid #1A2EFF; border-radius: 24px; padding: 40px; display: inline-block; }
+          .cert-title { font-size: 32px; font-weight: bold; color: #1A2EFF; margin-bottom: 24px; }
+          .cert-body { font-size: 20px; margin-bottom: 24px; }
+          .cert-name { font-size: 28px; font-weight: bold; color: #FFD600; margin: 16px 0; }
+          .cert-module { font-size: 22px; color: #1A2EFF; margin: 12px 0; }
+          .cert-date { font-size: 16px; color: #888; margin-top: 24px; }
+        </style>
+      </head>
+      <body>
+        <div class="cert">
+          <div class="cert-title">Certificate of Completion</div>
+          <div class="cert-body">This is to certify that</div>
+          <div class="cert-name">${userName}</div>
+          <div class="cert-body">has successfully completed the module</div>
+          <div class="cert-module">${moduleName}</div>
+          <div class="cert-date">Date: ${date}</div>
+        </div>
+        <script>window.print();</script>
+      </body>
+    </html>
+  `;
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
 
 export default function AdminScreen() {
   const { signOut } = useAuth();
@@ -46,6 +80,15 @@ export default function AdminScreen() {
     Leadership: [],
     Strategy: [],
   });
+  const [topics, setTopics] = useState([]);
+  const [selectedModule, setSelectedModule] = useState('');
+  // Mock completion data: moduleId -> [userEmail]
+  const mockCompletions = {
+    1: ['alice@example.com', 'bob@example.com'],
+    2: ['carol@example.com'],
+    3: ['dave@example.com'],
+    4: ['sam@example.com', 'george@example.com'],
+  };
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -65,6 +108,8 @@ export default function AdminScreen() {
         setError('Failed to load admin data');
         setLoading(false);
       });
+    // Fetch topics for module selection
+    api.getTopics().then(setTopics);
   }, []);
 
   // Handler for picking a video file
@@ -272,6 +317,40 @@ export default function AdminScreen() {
           disabled={!topicTitle || !topicDesc || !video || !topicId || uploading}
         />
       </View>
+      {/* Certificates Section (Module selection + users who completed) */}
+      <View style={styles.certificateBox}>
+        <Text style={styles.statsTitle}>Print Certificates</Text>
+        <Text style={{ marginBottom: 8 }}>Select Module:</Text>
+        <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, marginBottom: 12 }}>
+          <Picker
+            selectedValue={selectedModule}
+            onValueChange={setSelectedModule}
+            style={{ width: 250 }}
+          >
+            <Picker.Item label="Select a module..." value="" />
+            {topics.map((topic) => (
+              <Picker.Item key={topic.id} label={topic.title} value={topic.id} />
+            ))}
+          </Picker>
+        </View>
+        {selectedModule && (mockCompletions[selectedModule] || []).length === 0 && (
+          <Text style={{ color: '#888', marginBottom: 8 }}>No users completed this module.</Text>
+        )}
+        {selectedModule && (mockCompletions[selectedModule] || []).map((userEmail, i) => (
+          <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+            <Text style={{ flex: 1 }}>{userEmail}</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#1A2EFF', padding: 8, borderRadius: 8 }}
+              onPress={() => {
+                const moduleName = topics.find(t => t.id === selectedModule)?.title || 'Module';
+                printCertificate({ userName: userEmail, moduleName });
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Print Certificate</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -422,5 +501,19 @@ const styles = StyleSheet.create({
   },
   addMaterialRow: {
     marginTop: 10,
+  },
+  certificateBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 24,
+    marginBottom: 24,
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
   },
 }); 
