@@ -1,31 +1,28 @@
-// ForumScreen.js
-// Screen for discussion forums and Q&A boards per business topic.
+// e-wealth/app/forum.tsx or e-wealth/src/screens/ForumWeb.js
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Modal, Keyboard } from 'react-native';
 import io from 'socket.io-client';
-import { Colors } from '../../constants/Colors';
 
-const SOCKET_SERVER_URL = 'http://localhost:3000'; // Change if your server runs elsewhere
+const SOCKET_SERVER_URL = 'http://localhost:3000'; // Change to your backend IP if needed
 
-export default function ForumScreen() {
+export default function ForumWeb() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [username, setUsername] = useState('');
-  const [usernameModal, setUsernameModal] = useState(true);
   const [tempUsername, setTempUsername] = useState('');
+  const [showModal, setShowModal] = useState(true);
   const socketRef = useRef(null);
-  const flatListRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!username) return;
     socketRef.current = io(SOCKET_SERVER_URL);
     socketRef.current.on('chat message', (msg) => {
       setMessages((prev) => [...prev, msg]);
-      flatListRef.current?.scrollToEnd({ animated: true });
+      scrollToBottom();
     });
     socketRef.current.on('chat history', (history) => {
       setMessages(history.map(m => ({ username: m.user_id, text: m.content })));
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 100);
+      setTimeout(scrollToBottom, 100);
     });
     return () => {
       socketRef.current.disconnect();
@@ -36,148 +33,65 @@ export default function ForumScreen() {
     if (input.trim() && username) {
       socketRef.current.emit('chat message', { username, text: input });
       setInput('');
-      Keyboard.dismiss();
     }
   };
 
   const handleSetUsername = () => {
     if (tempUsername.trim()) {
       setUsername(tempUsername.trim());
-      setUsernameModal(false);
+      setShowModal(false);
     }
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={80}>
-      <Modal visible={usernameModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Enter your username</Text>
-            <TextInput
-              style={styles.input}
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: 24 }}>
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
+        }}>
+          <div style={{ background: '#fff', padding: 32, borderRadius: 12 }}>
+            <h2>Enter your username</h2>
+            <input
               value={tempUsername}
-              onChangeText={setTempUsername}
+              onChange={e => setTempUsername(e.target.value)}
               placeholder="Username"
-              placeholderTextColor={Colors.light.icon}
+              style={{ padding: 8, fontSize: 16, marginBottom: 12 }}
               autoFocus
             />
-            <TouchableOpacity style={styles.sendButton} onPress={handleSetUsername}>
-              <Text style={styles.sendButtonText}>Join</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      <Text style={styles.title}>Discussion Forum</Text>
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(_, idx) => idx.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text style={styles.username}>{item.username || 'Anonymous'}:</Text>
-            <Text style={styles.messageText}>{item.text || item}</Text>
-          </View>
-        )}
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-      />
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
+            <button onClick={handleSetUsername} style={{ padding: 8, fontSize: 16 }}>Join</button>
+          </div>
+        </div>
+      )}
+      <h1>Discussion Forum</h1>
+      <div style={{
+        minHeight: 400, maxHeight: 500, overflowY: 'auto', background: '#f9f9f9',
+        borderRadius: 8, padding: 16, marginBottom: 16, border: '1px solid #eee'
+      }}>
+        {messages.map((item, idx) => (
+          <div key={idx} style={{ marginBottom: 8 }}>
+            <span style={{ color: '#0077cc', fontWeight: 'bold' }}>{item.username || 'Anonymous'}:</span>
+            <span style={{ marginLeft: 8 }}>{item.text || item}</span>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
           value={input}
-          onChangeText={setInput}
+          onChange={e => setInput(e.target.value)}
           placeholder="Type your message..."
-          placeholderTextColor={Colors.light.icon}
-          onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
+          style={{ flex: 1, padding: 12, fontSize: 16, borderRadius: 8, border: '1px solid #ccc' }}
+          onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+        <button onClick={sendMessage} style={{ padding: '12px 18px', fontSize: 16, borderRadius: 8, background: '#0077cc', color: '#fff', border: 'none' }}>
+          Send
+        </button>
+      </div>
+    </div>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: 12,
-    color: Colors.light.text,
-    textAlign: 'center',
-  },
-  messageBubble: {
-    backgroundColor: Colors.light.surface,
-    borderRadius: 12,
-    padding: 10,
-    marginVertical: 4,
-    marginHorizontal: 8,
-    alignSelf: 'flex-start',
-    maxWidth: '80%',
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.light.accent,
-  },
-  username: {
-    color: Colors.light.primary,
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  messageText: {
-    color: Colors.light.text,
-    fontSize: 16,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.light.surface,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: Colors.light.icon,
-    color: Colors.light.text,
-  },
-  sendButton: {
-    backgroundColor: Colors.light.accent,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    alignItems: 'center',
-  },
-  sendButtonText: {
-    color: Colors.light.background,
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: Colors.light.surface,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    width: 300,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: Colors.light.text,
-  },
-}); 
+} 
