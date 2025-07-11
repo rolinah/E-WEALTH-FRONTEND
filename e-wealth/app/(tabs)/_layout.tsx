@@ -52,6 +52,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />, 
+          headerShown: false, // Hide header only on Home
         }}
       />
       <Tabs.Screen
@@ -59,13 +60,15 @@ export default function TabLayout() {
         options={{
           title: 'Topics',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />, 
+          headerShown: true, // Show header on other tabs
         }}
       />
       <Tabs.Screen
         name="achievements"
         options={{
           title: 'Achievements',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="trophy.fill" color={color} />, 
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />, 
+          headerShown: true,
         }}
       />
       <Tabs.Screen
@@ -73,6 +76,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />, 
+          headerShown: true,
         }}
       />
     </Tabs>

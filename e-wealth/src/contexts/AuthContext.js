@@ -95,6 +95,11 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
   };
 
+  if (loading) {
+    // Optionally, show a splash/loading screen here
+    return null;
+  }
+
   return (
     <AuthContext.Provider value={value}>
       {children}

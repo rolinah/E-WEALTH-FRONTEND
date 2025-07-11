@@ -6,6 +6,7 @@ import 'react-native-reanimated';
 import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
 import { ActivityIndicator, View, Text, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useRouter, useSegments } from 'expo-router';
 
 function AppBrandBar() {
   return (
@@ -44,6 +45,10 @@ function AppBrandBar() {
 function AuthGate() {
   const { isAuthenticated, loading } = useAuth();
   const colorScheme = useColorScheme();
+  const segments = useSegments();
+
+  // Determine if we are on the Home page (/(tabs)/index)
+  const isHome = segments[0] === '(tabs)' && segments.length === 1;
 
   if (loading) {
     return (
@@ -57,7 +62,8 @@ function AuthGate() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <View style={{ flex: 1, backgroundColor: '#F5F6FA' }}>
         <StatusBar style="dark" backgroundColor="#1A2EFF" />
-        <AppBrandBar />
+        {/* Only show AppBrandBar if not on Home page */}
+        {!isHome && <AppBrandBar />}
         <View style={{
           flex: 1,
           marginTop: 18,
