@@ -166,4 +166,28 @@ export const api = {
     }
     return await res.json();
   },
+  getUserBadges: async (userId) => {
+    const token = await storage.getItem('jwt');
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`${BACKEND_URL}/badges/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to fetch badges');
+    }
+    return await res.json();
+  },
+  getUserProgress: async () => {
+    const token = await storage.getItem('jwt');
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`${BACKEND_URL}/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to fetch profile');
+    }
+    return await res.json();
+  },
 }; 
