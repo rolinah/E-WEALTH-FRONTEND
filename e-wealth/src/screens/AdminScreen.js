@@ -7,6 +7,9 @@ import { AppState } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
+import { BarChart, LineChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
+const screenWidth = Dimensions.get('window').width;
 
 function printCertificate({ userName, moduleName }) {
   const date = new Date().toLocaleDateString();
@@ -195,11 +198,85 @@ export default function AdminScreen() {
     };
   }, []);
 
+  // Add mock analytics data at the top of the component:
+  const analytics = {
+    popularModules: [
+      { name: 'Business', count: 24 },
+      { name: 'Sales', count: 18 },
+      { name: 'Management', count: 15 },
+      { name: 'Finance', count: 10 },
+      { name: 'Marketing', count: 7 },
+    ],
+    activeUsers: [5, 8, 12, 20, 18, 22, 25], // users per week
+    weeks: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7'],
+    avgCompletion: [
+      { name: 'Business', time: 4 },
+      { name: 'Sales', time: 6 },
+      { name: 'Management', time: 5 },
+      { name: 'Finance', time: 7 },
+      { name: 'Marketing', time: 3 },
+    ],
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: '#fff',
+    backgroundGradientTo: '#fff',
+    color: (opacity = 1) => `rgba(26, 46, 255, ${opacity})`,
+    labelColor: (opacity = 1) => '#222',
+    strokeWidth: 2,
+    barPercentage: 0.7,
+    useShadowColorFromDataset: false,
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Panel</Text>
       {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />}
       {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
+      <View style={styles.analyticsBox}>
+        <Text style={styles.statsTitle}>Admin Analytics Dashboard</Text>
+        {/* Most Popular Modules */}
+        <Text style={styles.analyticsLabel}>Most Popular Modules</Text>
+        <BarChart
+          data={{
+            labels: analytics.popularModules.map(m => m.name),
+            datasets: [{ data: analytics.popularModules.map(m => m.count) }],
+          }}
+          width={screenWidth - 48}
+          height={180}
+          chartConfig={chartConfig}
+          fromZero
+          showValuesOnTopOfBars
+          style={{ marginBottom: 16, borderRadius: 12 }}
+        />
+        {/* Active Users Over Time */}
+        <Text style={styles.analyticsLabel}>Active Users (Last 7 Weeks)</Text>
+        <LineChart
+          data={{
+            labels: analytics.weeks,
+            datasets: [{ data: analytics.activeUsers }],
+          }}
+          width={screenWidth - 48}
+          height={180}
+          chartConfig={chartConfig}
+          bezier
+          style={{ marginBottom: 16, borderRadius: 12 }}
+        />
+        {/* Average Completion Time */}
+        <Text style={styles.analyticsLabel}>Average Completion Time (days)</Text>
+        <BarChart
+          data={{
+            labels: analytics.avgCompletion.map(m => m.name),
+            datasets: [{ data: analytics.avgCompletion.map(m => m.time) }],
+          }}
+          width={screenWidth - 48}
+          height={180}
+          chartConfig={chartConfig}
+          fromZero
+          showValuesOnTopOfBars
+          style={{ marginBottom: 8, borderRadius: 12 }}
+        />
+      </View>
       {adminData && (
         <View style={styles.statsBox}>
           <Text style={styles.statsTitle}>Admin Stats</Text>
@@ -515,5 +592,26 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.04,
     shadowRadius: 8,
+  },
+  analyticsBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 24,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+  },
+  analyticsLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1A2EFF',
+    marginBottom: 4,
+    marginTop: 8,
   },
 }); 
