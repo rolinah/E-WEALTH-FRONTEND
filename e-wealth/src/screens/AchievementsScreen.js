@@ -1,20 +1,51 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import Badge from '../components/Badge';
 import XPProgressBar from '../components/XPProgressBar';
 import { Colors } from '../../constants/Colors';
-
-// Mock data for demonstration
-const mockStreak = 7;
-const mockXP = 320;
-const mockXPGoal = 500;
-const mockBadges = [
-  { id: 1, name: 'First Module', description: 'Completed your first module!' },
-  { id: 2, name: 'Quiz Master', description: 'Scored 100% on a quiz!' },
-  { id: 3, name: 'Streak Starter', description: '3-day learning streak!' },
-];
+import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AchievementsScreen() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [badges, setBadges] = useState([]);
+  const [xp, setXP] = useState(0);
+  const [xpGoal, setXPGoal] = useState(500);
+  const [streak, setStreak] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError('');
+      try {
+        // Fetch progress (XP, streak)
+        const progressData = await api.getUserProgress();
+        setXP(progressData.xp || 0);
+        setStreak(progressData.streak || 0);
+        // Optionally, set XP goal dynamically if available
+        if (progressData.xpGoal) setXPGoal(progressData.xpGoal);
+        // Fetch badges
+        if (user && user.id) {
+          const badgesData = await api.getUserBadges(user.id);
+          setBadges(badgesData);
+        }
+      } catch (e) {
+        setError(e.message || 'Failed to load achievements');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [user]);
+
+  if (loading) {
+    return <View style={styles.loading}><ActivityIndicator size="large" color={Colors.light.accent} /></View>;
+  }
+  if (error) {
+    return <View style={styles.loading}><Text style={styles.errorText}>{error}</Text></View>;
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Achievements</Text>
@@ -22,21 +53,25 @@ export default function AchievementsScreen() {
       {/* Streak */}
       <View style={styles.streakBox}>
         <Text style={styles.streakLabel}>Current Streak</Text>
-        <Text style={styles.streakValue}>{mockStreak} days 🔥</Text>
+        <Text style={styles.streakValue}>{streak} days 🔥</Text>
       </View>
       {/* XP Progress */}
       <View style={styles.xpBox}>
         <Text style={styles.xpLabel}>XP Progress</Text>
-        <XPProgressBar xp={mockXP} goal={mockXPGoal} />
-        <Text style={styles.xpText}>{mockXP} / {mockXPGoal} XP</Text>
+        <XPProgressBar xp={xp} goal={xpGoal} />
+        <Text style={styles.xpText}>{xp} / {xpGoal} XP</Text>
       </View>
       {/* Badges */}
       <View style={styles.badgesBox}>
         <Text style={styles.badgesLabel}>Badges</Text>
         <View style={styles.badgesList}>
-          {mockBadges.map(badge => (
-            <Badge key={badge.id} name={badge.name} description={badge.description} />
-          ))}
+          {badges.length === 0 ? (
+            <Text style={styles.xpText}>No badges yet.</Text>
+          ) : (
+            badges.map(badge => (
+              <Badge key={badge.id} name={badge.name} description={badge.description || ''} />
+            ))
+          )}
         </View>
       </View>
     </ScrollView>
@@ -48,6 +83,17 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: Colors.light.background,
     alignItems: 'center',
+  },
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.light.background,
+  },
+  errorText: {
+    color: Colors.light.error,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 28,

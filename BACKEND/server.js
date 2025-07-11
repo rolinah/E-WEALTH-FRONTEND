@@ -166,6 +166,23 @@ app.post('/upload', upload.single('video'), async (req, res) => {
   res.json({ url: videoUrl });
 });
 
+// Avatar upload endpoint (authenticated)
+app.post('/upload/avatar', upload.single('avatar'), async (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth) return res.status(401).json({ error: 'No token' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], 'your_jwt_secret');
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    // Save file and return URL
+    const avatarUrl = `http://localhost:${process.env.PORT || 3000}/uploads/${req.file.filename}`;
+    // Optionally update user profile with new avatar
+    await pool.query('UPDATE users SET avatar = ? WHERE id = ?', [avatarUrl, decoded.id]);
+    res.json({ url: avatarUrl });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
 // Get videos for a user
 app.get('/videos/:userId', async (req, res) => {
   const [rows] = await pool.query('SELECT * FROM videos WHERE user_id = ?', [req.params.userId]);
