@@ -95,9 +95,12 @@ export default function AdminScreen() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/auth/login');
+    }
+  }, [isAuthenticated]);
   if (!isAuthenticated) {
-    // Redirect to login
-    router.replace('/auth/login');
     return null;
   }
 
