@@ -2,16 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
 import { Colors } from '../../constants/Colors';
+import { interests as allInterests } from './InterestsScreen';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editMode, setEditMode] = useState(false);
+  const [editInterests, setEditInterests] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
       try {
         const data = await api.getProfile();
         setProfile(data);
+        setEditInterests(data.interests || []);
       } catch (e) {
         // handle error
       } finally {
@@ -19,6 +27,28 @@ export default function ProfileScreen() {
       }
     })();
   }, []);
+
+  const toggleInterest = (name) => {
+    setEditInterests((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage('');
+    try {
+      await api.updateProfile({ interests: editInterests });
+      setProfile((prev) => ({ ...prev, interests: editInterests }));
+      setEditMode(false);
+      setMessage('Profile updated!');
+    } catch (e) {
+      setMessage(e.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setMessage(''), 2000);
+    }
+  };
 
   if (loading) {
     return <View style={styles.loading}><ActivityIndicator size="large" color={Colors.light.accent} /></View>;
@@ -41,15 +71,43 @@ export default function ProfileScreen() {
       </View>
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Interests</Text>
-        <View style={styles.chipContainer}>
-          {(profile.interests || []).map((interest, idx) => (
-            <View key={idx} style={styles.chip}>
-              <Text style={styles.chipText}>{interest}</Text>
-            </View>
-          ))}
-        </View>
+        {editMode ? (
+          <View style={styles.chipContainer}>
+            {allInterests.map((interest, idx) => {
+              const isSelected = editInterests.includes(interest.name);
+              return (
+                <TouchableOpacity
+                  key={idx}
+                  style={[styles.chip, isSelected && { backgroundColor: interest.color, borderColor: interest.color }]}
+                  activeOpacity={0.8}
+                  onPress={() => toggleInterest(interest.name)}
+                >
+                  <Text style={[styles.chipText, isSelected && { color: '#222' }]}>{interest.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.chipContainer}>
+            {(Array.isArray(profile.interests) ? profile.interests : []).map((interest, idx) => (
+              <View key={idx} style={styles.chip}>
+                <Text style={styles.chipText}>{interest}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {editMode && (
+          <TouchableOpacity
+            style={[styles.saveButton, saving && { opacity: 0.6 }]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save Interests'}</Text>
+          </TouchableOpacity>
+        )}
+        {!!message && <Text style={styles.saveMessage}>{message}</Text>}
       </View>
-      <TouchableOpacity style={styles.editButton}>
+      <TouchableOpacity style={styles.editButton} onPress={() => router.push('/edit-profile')}>
         <Text style={styles.editButtonText}>Edit Profile</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -150,5 +208,25 @@ const styles = StyleSheet.create({
     color: Colors.light.background,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  saveButton: {
+    backgroundColor: Colors.light.accent,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  saveButtonText: {
+    color: Colors.light.background,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  saveMessage: {
+    color: Colors.light.accent,
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 12,
   },
 }); 

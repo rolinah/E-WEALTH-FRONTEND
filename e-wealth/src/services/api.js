@@ -149,4 +149,21 @@ export const api = {
       return [];
     }
   },
+  updateProfile: async (profileData) => {
+    const token = await storage.getItem('jwt');
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(`${BACKEND_URL}/api/user/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to update profile');
+    }
+    return await res.json();
+  },
 }; 

@@ -140,6 +140,23 @@ ensureBadgesTable();
   }
 })();
 
+// Ensure users table has 'avatar' column
+(async function ensureUserAvatarColumn() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN avatar VARCHAR(255)");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+})();
+// Ensure users table has 'interests' column
+(async function ensureUserInterestsColumn() {
+  try {
+    await pool.query("ALTER TABLE users ADD COLUMN interests TEXT");
+  } catch (e) {
+    // Ignore error if column already exists
+  }
+})();
+
 // Video upload endpoint
 app.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -221,7 +238,7 @@ app.post('/badges/:userId', express.json(), async (req, res) => {
 // IMPORTANT: Admin registration requires ADMIN_SECRET in your .env file
 // Only users with the correct adminSecret can register as admin
 app.post('/auth/signup', express.json(), async (req, res) => {
-  const { email, password, name, role, adminSecret } = req.body;
+  const { email, password, name, role, adminSecret, avatar, bio, interests } = req.body;
   // Enforce adminSecret for admin registration
   if (role === 'admin') {
     if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
@@ -230,7 +247,10 @@ app.post('/auth/signup', express.json(), async (req, res) => {
   }
   const hash = await bcrypt.hash(password, 10);
   try {
-    await pool.query('INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)', [email, hash, name, role || 'user']);
+    await pool.query(
+      'INSERT INTO users (email, password, name, role, avatar, bio, interests) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [email, hash, name, role || 'user', avatar || null, bio || '', interests ? JSON.stringify(interests) : '[]']
+    );
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
@@ -255,9 +275,11 @@ app.get('/profile', async (req, res) => {
   if (!auth) return res.status(401).json({ error: 'No token' });
   try {
     const decoded = jwt.verify(auth.split(' ')[1], 'your_jwt_secret');
-    const [rows] = await pool.query('SELECT id, email, name FROM users WHERE id = ?', [decoded.id]);
+    const [rows] = await pool.query('SELECT id, email, name, bio, avatar, interests, role FROM users WHERE id = ?', [decoded.id]);
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
-    res.json(rows[0]);
+    const user = rows[0];
+    user.interests = user.interests ? JSON.parse(user.interests) : [];
+    res.json(user);
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
   }
@@ -317,7 +339,7 @@ function authenticateJWT(req, res, next) {
 // Update user profile (name, email, bio, password)
 app.put('/api/user/profile', authenticateJWT, express.json(), async (req, res) => {
   const userId = req.user.id;
-  const { name, email, bio, password } = req.body;
+  const { name, email, bio, password, interests } = req.body;
   let updateFields = [];
   let updateValues = [];
   if (name) {
@@ -337,6 +359,10 @@ app.put('/api/user/profile', authenticateJWT, express.json(), async (req, res) =
     updateFields.push('password = ?');
     updateValues.push(hash);
   }
+  if (interests !== undefined) {
+    updateFields.push('interests = ?');
+    updateValues.push(JSON.stringify(interests));
+  }
   if (updateFields.length === 0) {
     return res.status(400).json({ error: 'No fields to update' });
   }
@@ -352,9 +378,11 @@ app.put('/api/user/profile', authenticateJWT, express.json(), async (req, res) =
 // /api/user/profile (GET) - alias for /profile, but requires JWT
 app.get('/api/user/profile', authenticateJWT, async (req, res) => {
   const userId = req.user.id;
-  const [rows] = await pool.query('SELECT id, email, name FROM users WHERE id = ?', [userId]);
+  const [rows] = await pool.query('SELECT id, email, name, bio, avatar, interests, role FROM users WHERE id = ?', [userId]);
   if (!rows.length) return res.status(404).json({ error: 'User not found' });
-  res.json(rows[0]);
+  const user = rows[0];
+  user.interests = user.interests ? JSON.parse(user.interests) : [];
+  res.json(user);
 });
 // /api/topics (GET) - alias for /topics, but requires JWT
 app.get('/api/topics', authenticateJWT, async (req, res) => {

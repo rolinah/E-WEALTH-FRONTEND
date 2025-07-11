@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { api } from '../services/api';
+import { useRouter } from 'expo-router';
 
 const interests = [
   { name: 'Business', color: '#FFD600' }, // yellow
@@ -15,11 +17,29 @@ const interests = [
 
 export default function InterestsScreen() {
   const [selected, setSelected] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  const router = useRouter();
 
   const toggleInterest = (name) => {
     setSelected((prev) =>
       prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage('');
+    try {
+      await api.updateProfile({ interests: selected });
+      setMessage('Interests saved!');
+      // Optionally, navigate to profile or another screen
+      // router.push('/(tabs)/profile');
+    } catch (e) {
+      setMessage(e.message || 'Failed to save interests');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -41,6 +61,14 @@ export default function InterestsScreen() {
           );
         })}
       </View>
+      <TouchableOpacity
+        style={[styles.saveButton, saving && { opacity: 0.6 }]}
+        onPress={handleSave}
+        disabled={saving}
+      >
+        <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save Interests'}</Text>
+      </TouchableOpacity>
+      {!!message && <Text style={styles.saveMessage}>{message}</Text>}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Why choosing your interests matters</Text>
         <Text style={styles.sectionDesc}>
@@ -125,5 +153,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     maxWidth: 360,
+  },
+  saveButton: {
+    backgroundColor: '#FFD600',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  saveButtonText: {
+    color: '#222',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  saveMessage: {
+    color: '#FFD600',
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 12,
   },
 }); 
