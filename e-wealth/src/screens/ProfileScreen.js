@@ -163,6 +163,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.name}>{profile.name}</Text>
         <Text style={styles.email}>{profile.email}</Text>
+        <Text style={styles.roleDebug}>Role: {profile.role || 'unknown'}</Text>
       </View>
       <View style={styles.badgesSection}>
         <Text style={styles.badgesTitle}>Badges</Text>
@@ -285,6 +286,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.icon,
     marginBottom: 8,
+  },
+  roleDebug: {
+    color: Colors.light.secondary,
+    fontSize: 14,
+    marginTop: 2,
+    marginBottom: 2,
   },
   sectionCard: {
     backgroundColor: Colors.light.surface,
