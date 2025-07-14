@@ -5,6 +5,7 @@ import { Colors } from '../../constants/Colors';
 import { interests as allInterests } from './InterestsScreen';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { useAuth } from '../contexts/AuthContext';
 
 const BADGES = [
   {
@@ -85,6 +86,7 @@ export default function ProfileScreen() {
   const [message, setMessage] = useState('');
   const router = useRouter();
   const [profileImage, setProfileImage] = useState(null);
+  const { signOut } = useAuth();
 
   useEffect(() => {
     (async () => {
@@ -120,6 +122,11 @@ export default function ProfileScreen() {
       setSaving(false);
       setTimeout(() => setMessage(''), 2000);
     }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace('/auth/login');
   };
 
   const pickImage = async () => {
@@ -229,6 +236,9 @@ export default function ProfileScreen() {
       </View>
       <TouchableOpacity style={styles.editButton} onPress={() => router.push('/edit-profile')}>
         <Text style={styles.editButtonText}>Edit Profile</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -465,5 +475,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 13,
+  },
+  logoutButton: {
+    backgroundColor: Colors.light.error,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 32,
+  },
+  logoutButtonText: {
+    color: Colors.light.background,
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 }); 

@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, userData) => {
     setLoading(true);
     try {
-      await api.signUp(email, password, userData.name);
+      await api.signUp(email, password, userData.name, userData.role, userData.adminSecret);
       await signIn(email, password);
     } finally {
       setLoading(false);
@@ -94,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     signOut,
     getProfile,
     isAuthenticated: !!user,
+    isAdmin: user?.role === 'admin',
   };
 
   if (loading) {

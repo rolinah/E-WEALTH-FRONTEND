@@ -6,10 +6,12 @@ import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAuth } from '../../src/contexts/AuthContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
+  const { isAdmin } = useAuth();
 
   return (
     <Tabs
@@ -79,6 +81,17 @@ export default function TabLayout() {
           headerShown: true,
         }}
       />
+      {/* Admin Tab - only show if admin */}
+      {isAdmin && (
+        <Tabs.Screen
+          name="admin"
+          options={{
+            title: 'Admin',
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+            headerShown: true,
+          }}
+        />
+      )}
     </Tabs>
   );
 }

@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
 import { ActivityIndicator, View, Text, Platform } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter, useSegments } from 'expo-router';
+import React from 'react';
 
 function AppBrandBar() {
   return (
@@ -43,12 +44,28 @@ function AppBrandBar() {
 }
 
 function AuthGate() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isAdmin } = useAuth();
   const colorScheme = useColorScheme();
   const segments = useSegments();
+  const router = useRouter();
 
   // Determine if we are on the Home page (/(tabs)/index)
   const isHome = segments[0] === '(tabs)' && segments.length === 1;
+
+  // Restrict admin screens to admins only
+  React.useEffect(() => {
+    if (
+      isAuthenticated &&
+      !isAdmin &&
+      [
+        '/admin-content-manager',
+        '/admin-analytics',
+        '/(tabs)/admin',
+      ].includes(router.asPath)
+    ) {
+      router.replace('/');
+    }
+  }, [isAuthenticated, isAdmin, router.asPath]);
 
   if (loading) {
     return (
@@ -95,8 +112,9 @@ function AuthGate() {
                 <Stack.Screen name="progress-dashboard" options={{ title: 'Progress Dashboard' }} />
                 <Stack.Screen name="forum" options={{ title: 'Forum' }} />
                 <Stack.Screen name="peer-mentoring" options={{ title: 'Peer Mentoring' }} />
-                <Stack.Screen name="admin-content-manager" options={{ title: 'Admin Content Manager' }} />
-                <Stack.Screen name="admin-analytics" options={{ title: 'Admin Analytics' }} />
+                {/* Admin Screens - only show if admin */}
+                {isAdmin && <Stack.Screen name="admin-content-manager" options={{ title: 'Admin Content Manager' }} />}
+                {isAdmin && <Stack.Screen name="admin-analytics" options={{ title: 'Admin Analytics' }} />}
                 {/* Other Screens */}
                 <Stack.Screen name="splash" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />

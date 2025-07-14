@@ -46,7 +46,7 @@ function printCertificate({ userName, moduleName }) {
 }
 
 export default function AdminScreen() {
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -92,12 +92,15 @@ export default function AdminScreen() {
     3: ['dave@example.com'],
     4: ['sam@example.com', 'george@example.com'],
   };
-  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  if (!isAuthenticated) {
-    // Redirect to login
-    router.replace('/auth/login');
+  React.useEffect(() => {
+    if (!isAdmin) {
+      router.replace('/');
+    }
+  }, [isAdmin]);
+
+  if (!isAdmin) {
     return null;
   }
 

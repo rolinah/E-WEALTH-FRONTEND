@@ -6,11 +6,14 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:300
 
 export const api = {
   // Authentication
-  signUp: async (email, password, name) => {
+  signUp: async (email, password, name, role, adminSecret) => {
+    const body = { email, password, name };
+    if (role) body.role = role;
+    if (adminSecret) body.adminSecret = adminSecret;
     const res = await fetch(`${BACKEND_URL}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const errorData = await res.json();
