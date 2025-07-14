@@ -46,7 +46,7 @@ function printCertificate({ userName, moduleName }) {
 }
 
 export default function AdminScreen() {
-  const { signOut, isAdmin } = useAuth();
+  const { signOut, isAdmin, isAuthenticated } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
