@@ -94,13 +94,9 @@ export default function AdminScreen() {
   };
   const router = useRouter();
 
-  React.useEffect(() => {
-    if (!isAdmin) {
-      router.replace('/');
-    }
-  }, [isAdmin]);
-
-  if (!isAdmin) {
+  if (!isAuthenticated) {
+    // Redirect to login
+    router.replace('/auth/login');
     return null;
   }
 
