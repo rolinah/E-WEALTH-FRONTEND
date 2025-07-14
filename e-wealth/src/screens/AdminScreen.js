@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, TouchableOpacity, FlatList, Picker } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, TouchableOpacity, FlatList, Picker, ScrollView } from 'react-native';
 import { api } from '../services/api';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadAdminTopicWithVideo } from '../services/admin';
@@ -93,6 +93,42 @@ export default function AdminScreen() {
     4: ['sam@example.com', 'george@example.com'],
   };
   const router = useRouter();
+  const [newTopicTitle, setNewTopicTitle] = useState('');
+  const [newTopicDesc, setNewTopicDesc] = useState('');
+  const [creatingTopic, setCreatingTopic] = useState(false);
+
+  // Handler for creating a new topic (without video)
+  const createTopic = async () => {
+    if (!newTopicTitle || !newTopicDesc) {
+      Alert.alert('Error', 'Please enter a title and description for the topic.');
+      return;
+    }
+    setCreatingTopic(true);
+    try {
+      // You may need to implement this endpoint in your backend
+      const res = await fetch('http://localhost:3000/admin/create-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTopicTitle, description: newTopicDesc }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to create topic');
+      Alert.alert('Success', 'Topic created successfully!');
+      setNewTopicTitle('');
+      setNewTopicDesc('');
+      // Optionally refresh topics list
+      api.getTopics().then(setTopics);
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setCreatingTopic(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (!isAdmin) {
+      router.replace('/');
+    }
+  }, [isAdmin]);
 
   if (!isAuthenticated) {
     // Redirect to login
@@ -228,8 +264,32 @@ export default function AdminScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Admin Panel</Text>
+    <ScrollView contentContainerStyle={{ padding: 24 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16 }}>Admin Dashboard</Text>
+      {/* Topic Creation Form */}
+      <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 24, elevation: 2 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>Create New Topic</Text>
+        <TextInput
+          placeholder="Topic Title"
+          value={newTopicTitle}
+          onChangeText={setNewTopicTitle}
+          style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 12 }}
+        />
+        <TextInput
+          placeholder="Topic Description"
+          value={newTopicDesc}
+          onChangeText={setNewTopicDesc}
+          style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 12, minHeight: 60 }}
+          multiline
+        />
+        <TouchableOpacity
+          style={{ backgroundColor: Colors.light.primary, borderRadius: 8, padding: 14, alignItems: 'center' }}
+          onPress={createTopic}
+          disabled={creatingTopic}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{creatingTopic ? 'Creating...' : 'Create Topic'}</Text>
+        </TouchableOpacity>
+      </View>
       {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />}
       {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
       <View style={styles.analyticsBox}>
@@ -427,7 +487,7 @@ export default function AdminScreen() {
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

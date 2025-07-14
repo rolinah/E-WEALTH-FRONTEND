@@ -49,48 +49,76 @@ export default function TabLayout() {
         },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />, 
-          headerShown: false, // Hide header only on Home
-        }}
-      />
-      <Tabs.Screen
-        name="topics-collection"
-        options={{
-          title: 'Topics',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />, 
-          headerShown: true, // Show header on other tabs
-        }}
-      />
-      <Tabs.Screen
-        name="achievements"
-        options={{
-          title: 'Achievements',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />, 
-          headerShown: true,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />, 
-          headerShown: true,
-        }}
-      />
-      {/* Admin Tab - only show if admin */}
-      {isAdmin && (
-        <Tabs.Screen
-          name="admin"
-          options={{
-            title: 'Admin',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
-            headerShown: true,
-          }}
-        />
+      {isAdmin ? (
+        <>
+          <Tabs.Screen
+            name="admin"
+            options={{
+              title: 'Admin',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+              headerShown: true,
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: 'Profile',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />,
+              headerShown: true,
+            }}
+          />
+          <Tabs.Screen
+            name="settings"
+            options={{
+              title: 'Settings',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
+              headerShown: true,
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />, 
+              headerShown: false,
+            }}
+          />
+          <Tabs.Screen
+            name="topics-collection"
+            options={{
+              title: 'Topics',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />, 
+              headerShown: true,
+            }}
+          />
+          <Tabs.Screen
+            name="achievements"
+            options={{
+              title: 'Achievements',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />, 
+              headerShown: true,
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: 'Profile',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />, 
+              headerShown: true,
+            }}
+          />
+          <Tabs.Screen
+            name="settings"
+            options={{
+              title: 'Settings',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
+              headerShown: true,
+            }}
+          />
+        </>
       )}
     </Tabs>
   );

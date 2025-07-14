@@ -1,26 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Video } from 'expo-av';
 import { api } from '../services/api';
 import { Colors } from '../../constants/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function TopicsCollectionScreen() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await api.getTopics();
-        setTopics(data);
-      } catch (e) {
-        setError('Failed to load topics. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      setLoading(true);
+      api.getTopics()
+        .then(data => {
+          if (isActive) setTopics(data);
+        })
+        .catch(() => {
+          if (isActive) setError('Failed to load topics. Please try again later.');
+        })
+        .finally(() => {
+          if (isActive) setLoading(false);
+        });
+      return () => { isActive = false; };
+    }, [])
+  );
 
   if (loading) {
     return <View style={styles.loading}><ActivityIndicator size="large" color={Colors.light.accent} accessibilityLabel="Loading topics" /></View>;

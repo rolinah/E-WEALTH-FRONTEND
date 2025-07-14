@@ -1,10 +1,5 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import AchievementsScreen from '../../src/screens/AchievementsScreen';
 
-export default function AchievementsScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Achievements</Text>
-    </View>
-  );
+export default function Achievements() {
+  return <AchievementsScreen />;
 } 
