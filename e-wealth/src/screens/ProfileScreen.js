@@ -88,6 +88,7 @@ export default function ProfileScreen() {
   const [editInterests, setEditInterests] = useState([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [interestError, setInterestError] = useState('');
   const router = useRouter();
   const [profileImage, setProfileImage] = useState(null);
   const { signOut } = useAuth();
@@ -116,14 +117,21 @@ export default function ProfileScreen() {
   }, [user]);
 
   const toggleInterest = (name) => {
-    setEditInterests((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
-    );
+    if (editInterests.includes(name)) {
+      setEditInterests((prev) => prev.filter((n) => n !== name));
+      setInterestError('');
+    } else if (editInterests.length < 2) {
+      setEditInterests((prev) => [...prev, name]);
+      setInterestError('');
+    } else {
+      setInterestError('You can only select up to 2 interests.');
+    }
   };
 
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
+    setInterestError('');
     try {
       await api.updateProfile({ interests: editInterests });
       setProfile((prev) => ({ ...prev, interests: editInterests }));
@@ -216,17 +224,20 @@ export default function ProfileScreen() {
           <View style={styles.chipContainer}>
             {allInterests.map((interest, idx) => {
               const isSelected = editInterests.includes(interest.name);
+              const isDisabled = !isSelected && editInterests.length >= 2;
               return (
                 <TouchableOpacity
                   key={idx}
-                  style={[styles.chip, isSelected && { backgroundColor: interest.color, borderColor: interest.color }]}
+                  style={[styles.chip, isSelected && { backgroundColor: interest.color, borderColor: interest.color }, isDisabled && { opacity: 0.5 }]}
                   activeOpacity={0.8}
                   onPress={() => toggleInterest(interest.name)}
+                  disabled={isDisabled}
                 >
                   <Text style={[styles.chipText, isSelected && { color: '#222' }]}>{interest.name}</Text>
                 </TouchableOpacity>
               );
             })}
+            {interestError ? <Text style={{ color: Colors.light.accent, marginTop: 8 }}>{interestError}</Text> : null}
           </View>
         ) : (
           <View style={styles.chipContainer}>

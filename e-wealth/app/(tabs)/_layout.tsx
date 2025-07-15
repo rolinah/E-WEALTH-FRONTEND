@@ -54,16 +54,8 @@ export default function TabLayout() {
           <Tabs.Screen
             name="admin"
             options={{
-              title: 'Admin',
+              title: 'Admin Dashboard',
               tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
-              headerShown: true,
-            }}
-          />
-          <Tabs.Screen
-            name="profile"
-            options={{
-              title: 'Profile',
-              tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />,
               headerShown: true,
             }}
           />
