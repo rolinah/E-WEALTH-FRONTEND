@@ -240,8 +240,24 @@ app.post('/posts', express.json(), async (req, res) => {
 
 // Get user badges
 app.get('/badges/:userId', async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM badges WHERE user_id = ?', [req.params.userId]);
-  res.json(rows);
+  const { userId } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM badges WHERE user_id = ?', [userId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch badges', details: err.message });
+  }
+});
+
+// JWT-protected alias for fetching badges
+app.get('/api/badges/:userId', authenticateJWT, async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM badges WHERE user_id = ?', [userId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch badges', details: err.message });
+  }
 });
 
 // Award badge
@@ -256,8 +272,16 @@ app.post('/badges/:userId', express.json(), async (req, res) => {
 // Only users with the correct adminSecret can register as admin
 app.post('/auth/signup', express.json(), async (req, res) => {
   const { email, password, name, role, adminSecret, avatar, bio, interests } = req.body;
+  // Validate required fields
+  if (!email || !password || !name) {
+    return res.status(400).json({ error: 'Name, email, and password are required.' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+  }
+  let userRole = role === 'admin' ? 'admin' : 'entrepreneur';
   // Enforce adminSecret for admin registration
-  if (role === 'admin') {
+  if (userRole === 'admin') {
     if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
       return res.status(403).json({ error: 'Admin registration requires a valid admin secret key.' });
     }
@@ -266,9 +290,9 @@ app.post('/auth/signup', express.json(), async (req, res) => {
   try {
     await pool.query(
       'INSERT INTO users (email, password, name, role, avatar, bio, interests) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [email, hash, name, role || 'user', avatar || null, bio || '', interests ? JSON.stringify(interests) : '[]']
+      [email, hash, name, userRole, avatar || null, bio || '', interests ? JSON.stringify(interests) : '[]']
     );
-    res.json({ success: true });
+    res.json({ success: true, role: userRole });
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
   }
@@ -283,7 +307,7 @@ app.post('/auth/login', express.json(), async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ error: 'Invalid credentials' });
   const token = jwt.sign({ id: user.id, email: user.email }, 'your_jwt_secret', { expiresIn: '7d' });
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
 });
 
 // Get profile (protected)
@@ -453,6 +477,28 @@ app.post('/api/user/register', express.json(), async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: 'Email already exists' });
+  }
+});
+
+// Notifications endpoint
+app.get('/api/notifications/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // Ensure notifications table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT,
+        message TEXT,
+        read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+    const [rows] = await pool.query('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC', [userId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch notifications', details: err.message });
   }
 });
 

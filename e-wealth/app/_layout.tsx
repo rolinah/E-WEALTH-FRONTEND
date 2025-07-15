@@ -49,8 +49,16 @@ function AuthGate() {
   const segments = useSegments();
   const router = useRouter();
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[AuthGate] isAuthenticated:', isAuthenticated, 'isAdmin:', isAdmin, 'segments:', segments);
+  }, [isAuthenticated, isAdmin, segments]);
+
   // Determine if we are on the Home page (/(tabs)/index)
   const isHome = segments[0] === '(tabs)' && segments.length === 1;
+
+  // Helper to get current path from segments
+  const currentPath = '/' + segments.join('/');
 
   // Restrict admin screens to admins only
   React.useEffect(() => {
@@ -61,11 +69,25 @@ function AuthGate() {
         '/admin-content-manager',
         '/admin-analytics',
         '/(tabs)/admin',
-      ].includes(router.asPath)
+      ].includes(currentPath)
     ) {
       router.replace('/');
     }
-  }, [isAuthenticated, isAdmin, router.asPath]);
+    // Restrict admins to only admin/profile/settings screens
+    if (
+      isAuthenticated &&
+      isAdmin &&
+      ![
+        '/(tabs)/admin',
+        '/(tabs)/profile',
+        '/(tabs)/settings',
+        '/splash',
+        '/+not-found',
+      ].includes(currentPath)
+    ) {
+      router.replace('/(tabs)/profile');
+    }
+  }, [isAuthenticated, isAdmin, currentPath]);
 
   if (loading) {
     return (
@@ -99,23 +121,22 @@ function AuthGate() {
               <>
                 {/* Main App Screens */}
                 <Stack.Screen name="(tabs)" />
-                {/* Learning Screens */}
-                <Stack.Screen name="interests" options={{ title: 'Choose Interests' }} />
-                <Stack.Screen name="topics-collection" options={{ title: 'Topics Collection' }} />
-                <Stack.Screen name="topics-dashboard" options={{ title: 'Topics Dashboard' }} />
-                <Stack.Screen name="topic-details" options={{ title: 'Topic Details' }} />
-                <Stack.Screen name="topic-list" options={{ title: 'Topic List' }} />
-                <Stack.Screen name="module-viewer" options={{ title: 'Module Viewer' }} />
-                <Stack.Screen name="quiz" options={{ title: 'Quiz' }} />
-                {/* New Feature Screens */}
-                <Stack.Screen name="skill-gap-analysis" options={{ title: 'Skill Gap Analysis' }} />
-                <Stack.Screen name="progress-dashboard" options={{ title: 'Progress Dashboard' }} />
-                <Stack.Screen name="forum" options={{ title: 'Forum' }} />
-                <Stack.Screen name="peer-mentoring" options={{ title: 'Peer Mentoring' }} />
-                {/* Admin Screens - only show if admin */}
+                {/* Entrepreneur Screens (only for non-admins) */}
+                {!isAdmin && <Stack.Screen name="interests" options={{ title: 'Choose Interests' }} />}
+                {!isAdmin && <Stack.Screen name="topics-collection" options={{ title: 'Topics Collection' }} />}
+                {!isAdmin && <Stack.Screen name="topics-dashboard" options={{ title: 'Topics Dashboard' }} />}
+                {!isAdmin && <Stack.Screen name="topic-details" options={{ title: 'Topic Details' }} />}
+                {!isAdmin && <Stack.Screen name="topic-list" options={{ title: 'Topic List' }} />}
+                {!isAdmin && <Stack.Screen name="module-viewer" options={{ title: 'Module Viewer' }} />}
+                {!isAdmin && <Stack.Screen name="quiz" options={{ title: 'Quiz' }} />}
+                {!isAdmin && <Stack.Screen name="skill-gap-analysis" options={{ title: 'Skill Gap Analysis' }} />}
+                {!isAdmin && <Stack.Screen name="progress-dashboard" options={{ title: 'Progress Dashboard' }} />}
+                {!isAdmin && <Stack.Screen name="forum" options={{ title: 'Forum' }} />}
+                {!isAdmin && <Stack.Screen name="peer-mentoring" options={{ title: 'Peer Mentoring' }} />}
+                {/* Admin Screens (only for admins) */}
                 {isAdmin && <Stack.Screen name="admin-content-manager" options={{ title: 'Admin Content Manager' }} />}
                 {isAdmin && <Stack.Screen name="admin-analytics" options={{ title: 'Admin Analytics' }} />}
-                {/* Other Screens */}
+                {/* Other Screens (shared) */}
                 <Stack.Screen name="splash" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </>

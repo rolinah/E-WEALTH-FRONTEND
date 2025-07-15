@@ -12,33 +12,42 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminSecret, setAdminSecret] = useState('');
+  const [notification, setNotification] = useState('');
+  const [notificationType, setNotificationType] = useState(''); // 'error' | 'success' | ''
   const { signUp } = useAuth();
   const router = useRouter();
 
   const handleSignUp = async () => {
+    setNotification('');
+    setNotificationType('');
     if (!email || !password || !confirmPassword || !name) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setNotification('Please fill in all fields');
+      setNotificationType('error');
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      setNotification('Passwords do not match');
+      setNotificationType('error');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      setNotification('Password must be at least 6 characters long');
+      setNotificationType('error');
       return;
     }
     if (isAdmin && !adminSecret) {
-      Alert.alert('Error', 'Admin secret is required for admin registration');
+      setNotification('Admin secret is required for admin registration');
+      setNotificationType('error');
       return;
     }
     setLoading(true);
     try {
-      await signUp(email, password, { name, role: isAdmin ? 'admin' : undefined, adminSecret: isAdmin ? adminSecret : undefined });
-      Alert.alert('Success', 'Account created successfully!');
-      // Navigation will be handled by AuthContext
+      await signUp(email, password, { name, role: isAdmin ? 'admin' : 'entrepreneur', adminSecret: isAdmin ? adminSecret : undefined });
+      setNotification('Account created successfully!');
+      setNotificationType('success');
     } catch (error) {
-      Alert.alert('Sign Up Failed', error.message);
+      setNotification(error.message || 'Sign Up Failed');
+      setNotificationType('error');
     } finally {
       setLoading(false);
     }
@@ -49,6 +58,12 @@ export default function SignUpScreen() {
       <View style={styles.card}>
         <Image source={require('../../assets/images/icon.png')} style={styles.logo} />
         <Text style={styles.title}>Sign Up</Text>
+        {/* Notification area */}
+        {!!notification && (
+          <View style={[styles.notification, notificationType === 'error' ? styles.error : styles.success]}>
+            <Text style={styles.notificationText}>{notification}</Text>
+          </View>
+        )}
         <TextInput 
           style={styles.input} 
           placeholder="Name" 
@@ -79,17 +94,25 @@ export default function SignUpScreen() {
           onChangeText={setConfirmPassword}
         />
         <View style={styles.adminRow}>
-          <Text style={styles.adminLabel}>Register as Admin</Text>
-          <Switch value={isAdmin} onValueChange={setIsAdmin} />
+          <Text style={styles.adminLabel}>Register as:</Text>
+          <TouchableOpacity style={[styles.roleButton, !isAdmin && styles.selectedRole]} onPress={() => setIsAdmin(false)}>
+            <Text style={[styles.roleButtonText, !isAdmin && styles.selectedRoleText]}>Entrepreneur</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.roleButton, isAdmin && styles.selectedRole]} onPress={() => setIsAdmin(true)}>
+            <Text style={[styles.roleButtonText, isAdmin && styles.selectedRoleText]}>Admin</Text>
+          </TouchableOpacity>
         </View>
         {isAdmin && (
-          <TextInput
-            style={styles.input}
-            placeholder="Admin Secret"
-            value={adminSecret}
-            onChangeText={setAdminSecret}
-            secureTextEntry
-          />
+          <View style={styles.adminWarningBox}>
+            <Text style={styles.adminWarningText}>Admin registration requires a valid secret key. Only authorized users should register as admin.</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Admin Secret"
+              value={adminSecret}
+              onChangeText={setAdminSecret}
+              secureTextEntry
+            />
+          </View>
         )}
         <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Creating Account...' : 'Sign Up'}</Text>
@@ -179,5 +202,61 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#222',
     marginRight: 8,
+  },
+  roleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.light.icon,
+    marginHorizontal: 4,
+  },
+  roleButtonText: {
+    fontSize: 14,
+    color: Colors.light.text,
+  },
+  selectedRole: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  selectedRoleText: {
+    color: Colors.light.background,
+    fontWeight: 'bold',
+  },
+  adminWarningBox: {
+    backgroundColor: Colors.light.warningBackground,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  adminWarningText: {
+    fontSize: 13,
+    color: Colors.light.warningText,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  notification: {
+    backgroundColor: Colors.light.surface,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  notificationText: {
+    fontSize: 14,
+    color: Colors.light.text,
+  },
+  error: {
+    backgroundColor: Colors.light.errorBackground,
+    borderColor: Colors.light.errorBorder,
+    borderWidth: 1,
+  },
+  success: {
+    backgroundColor: Colors.light.successBackground,
+    borderColor: Colors.light.successBorder,
+    borderWidth: 1,
   },
 });

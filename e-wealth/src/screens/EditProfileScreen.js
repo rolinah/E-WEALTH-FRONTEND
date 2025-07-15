@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
 import { api } from '../services/api';
 import { Colors } from '../../constants/Colors';
-import { interests as allInterests } from './InterestsScreen';
+import { interests as allInterestsRaw } from './InterestsScreen';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -105,6 +105,11 @@ export default function EditProfileScreen() {
         <ActivityIndicator size="large" color={Colors.light.accent} />
       </View>
     );
+  }
+
+  const allInterests = Array.isArray(allInterestsRaw) ? allInterestsRaw : [];
+  if (!Array.isArray(allInterestsRaw)) {
+    console.warn('[EditProfileScreen] allInterests is not an array:', allInterestsRaw);
   }
 
   return (

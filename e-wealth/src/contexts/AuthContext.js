@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { AppState } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
 
@@ -19,9 +20,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        // const currentUser = await api.getCurrentUser();
-        // setUser(currentUser);
-        setUser(null); // Always force unauthenticated on app start
+        // Try to load user from AsyncStorage
+        const storedUser = await AsyncStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          console.log('[AuthContext] Loaded user from storage:', parsedUser);
+        } else {
+          // Optionally, fetch from backend if needed
+          // const currentUser = await api.getCurrentUser();
+          // setUser(currentUser);
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error initializing user:', error);
         setUser(null);
@@ -35,6 +45,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     console.log('[AuthContext] user:', user, 'loading:', loading, 'isAuthenticated:', !!user);
+    AsyncStorage.getItem('user').then(u => {
+      console.log('[AuthContext] user in AsyncStorage:', u);
+    });
   }, [user, loading]);
 
   // Auto-logout on app background/close
@@ -67,6 +80,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const user = await api.signIn(email, password);
       setUser(user);
+      // Save user to AsyncStorage
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+      console.log('[AuthContext] Signed in user:', user);
     } finally {
       setLoading(false);
     }
@@ -77,6 +93,8 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.signOut();
       setUser(null);
+      await AsyncStorage.removeItem('user');
+      console.log('[AuthContext] Signed out user');
     } finally {
       setLoading(false);
     }
@@ -94,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     signOut,
     getProfile,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
+    isAdmin: typeof user?.role === 'string' && user.role.trim().toLowerCase() === 'admin',
   };
 
   if (loading) {

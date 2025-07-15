@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { api } from '../services/api';
 import { useRouter } from 'expo-router';
 
-const interests = [
+export const interests = [
   { name: 'Business', color: '#FFD600' }, // yellow
   { name: 'Sales', color: '#1A2EFF' },   // blue
   { name: 'Management', color: '#FF9900' }, // orange

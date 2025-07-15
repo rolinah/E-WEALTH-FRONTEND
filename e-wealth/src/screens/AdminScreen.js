@@ -124,15 +124,22 @@ export default function AdminScreen() {
     }
   };
 
+  // Debug logging
+  console.log('[AdminScreen] isAdmin:', isAdmin, 'isAuthenticated:', isAuthenticated);
+
+  // Only redirect if authenticated and not admin
   React.useEffect(() => {
-    if (!isAdmin) {
+    if (isAuthenticated && !isAdmin) {
       router.replace('/');
     }
-  }, [isAdmin]);
+  }, [isAuthenticated, isAdmin]);
 
   if (!isAuthenticated) {
-    // Redirect to login
     router.replace('/auth/login');
+    return null;
+  }
+  if (isAuthenticated && !isAdmin) {
+    // Already handled by effect, but return null to avoid rendering
     return null;
   }
 

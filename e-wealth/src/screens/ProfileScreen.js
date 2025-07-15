@@ -78,6 +78,10 @@ const COMPLETED_MODULES = [
 ];
 
 export default function ProfileScreen() {
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [notifLoading, setNotifLoading] = useState(true);
+  const [notifError, setNotifError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
@@ -101,6 +105,15 @@ export default function ProfileScreen() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (!user || !user.id) return;
+    setNotifLoading(true);
+    api.getNotifications(user.id)
+      .then(setNotifications)
+      .catch(e => setNotifError(e.message || 'Failed to load notifications'))
+      .finally(() => setNotifLoading(false));
+  }, [user]);
 
   const toggleInterest = (name) => {
     setEditInterests((prev) =>
@@ -235,6 +248,21 @@ export default function ProfileScreen() {
         )}
         {!!message && <Text style={styles.saveMessage}>{message}</Text>}
       </View>
+      <Text style={styles.sectionTitle}>Notifications</Text>
+      {notifLoading ? (
+        <ActivityIndicator size="small" color={Colors.light.accent} />
+      ) : notifError ? (
+        <Text style={styles.errorText}>{notifError}</Text>
+      ) : notifications.length === 0 ? (
+        <Text style={styles.emptyText}>No notifications.</Text>
+      ) : (
+        notifications.map((notif, idx) => (
+          <View key={notif.id || idx} style={styles.notifItem}>
+            <Text style={styles.notifText}>{notif.message}</Text>
+            <Text style={styles.notifDate}>{new Date(notif.created_at).toLocaleString()}</Text>
+          </View>
+        ))
+      )}
       <TouchableOpacity style={styles.editButton} onPress={() => router.push('/edit-profile')}>
         <Text style={styles.editButtonText}>Edit Profile</Text>
       </TouchableOpacity>
@@ -307,6 +335,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 10,
     color: Colors.light.accent,
+    alignSelf: 'flex-start',
+    marginTop: 24,
   },
   sectionDesc: {
     fontSize: 15,
@@ -496,5 +526,34 @@ const styles = StyleSheet.create({
     color: Colors.light.background,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  notifItem: {
+    backgroundColor: Colors.light.surface,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  notifText: {
+    color: Colors.light.text,
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  notifDate: {
+    color: Colors.light.icon,
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  emptyText: {
+    color: Colors.light.icon,
+    fontSize: 15,
+    fontStyle: 'italic',
+    marginBottom: 8,
   },
 }); 

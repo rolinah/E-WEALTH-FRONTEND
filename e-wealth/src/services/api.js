@@ -32,6 +32,7 @@ export const api = {
       throw new Error(errorData.error || 'Login failed');
     }
     const data = await res.json();
+    console.log('[api.signIn] user from backend:', data.user);
     await storage.setItem('jwt', data.token);
     await storage.setItem('user', JSON.stringify(data.user));
     return data.user;
@@ -191,6 +192,14 @@ export const api = {
       const errorData = await res.json();
       throw new Error(errorData.error || 'Failed to fetch profile');
     }
+    return await res.json();
+  },
+  getNotifications: async (userId) => {
+    const token = await storage.getItem('jwt');
+    const res = await fetch(`${BACKEND_URL}/api/notifications/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Failed to fetch notifications');
     return await res.json();
   },
 }; 
