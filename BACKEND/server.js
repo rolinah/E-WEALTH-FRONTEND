@@ -122,6 +122,28 @@ async function ensureBadgesTable() {
 }
 ensureBadgesTable();
 
+// Create video_completions table if not exists
+async function ensureVideoCompletionsTable() {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS video_completions (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id VARCHAR(255),
+      module_id INT,
+      completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_completion (user_id, module_id)
+    )
+  `;
+  await pool.query(sql);
+}
+
+// Ensure users table has xp column
+async function ensureUsersXpColumn() {
+  const [rows] = await pool.query("SHOW COLUMNS FROM users LIKE 'xp'");
+  if (rows.length === 0) {
+    await pool.query('ALTER TABLE users ADD COLUMN xp INT DEFAULT 0');
+  }
+}
+
 // Update users table to include 'role' if not already present
 (async function ensureUserRoleColumn() {
   try {
@@ -499,6 +521,34 @@ app.get('/api/notifications/:userId', async (req, res) => {
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch notifications', details: err.message });
+  }
+});
+
+// Endpoint: User completed a video/module, award XP
+app.post('/api/video/completed', express.json(), async (req, res) => {
+  const { userId, moduleId } = req.body;
+  if (!userId || !moduleId) {
+    return res.status(400).json({ error: 'Missing userId or moduleId' });
+  }
+  try {
+    // Check if already completed
+    const [rows] = await pool.query(
+      'SELECT * FROM video_completions WHERE user_id = ? AND module_id = ?',
+      [userId, moduleId]
+    );
+    if (rows.length > 0) {
+      return res.json({ success: false, message: 'Already completed' });
+    }
+    // Award XP (25 per video)
+    await pool.query('UPDATE users SET xp = xp + 25 WHERE id = ?', [userId]);
+    // Record completion
+    await pool.query(
+      'INSERT INTO video_completions (user_id, module_id) VALUES (?, ?)',
+      [userId, moduleId]
+    );
+    res.json({ success: true, message: 'XP awarded' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to award XP', details: err.message });
   }
 });
 

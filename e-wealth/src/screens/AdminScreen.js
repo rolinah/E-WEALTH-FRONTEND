@@ -10,6 +10,7 @@ import { Colors } from '../../constants/Colors';
 import { BarChart, LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Toast from 'react-native-toast-message';
 const screenWidth = Dimensions.get('window').width;
 
 function printCertificate({ userName, moduleName }) {
@@ -128,19 +129,17 @@ export default function AdminScreen() {
   // Debug logging
   console.log('[AdminScreen] isAdmin:', isAdmin, 'isAuthenticated:', isAuthenticated);
 
-  // Only redirect if authenticated and not admin
-  React.useEffect(() => {
-    if (isAuthenticated && !isAdmin) {
+  // Redirect logic in useEffect
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/auth/login');
+    } else if (isAuthenticated && !isAdmin) {
       router.replace('/');
     }
   }, [isAuthenticated, isAdmin]);
 
-  if (!isAuthenticated) {
-    router.replace('/auth/login');
-    return null;
-  }
-  if (isAuthenticated && !isAdmin) {
-    // Already handled by effect, but return null to avoid rendering
+  // Only return null after all hooks
+  if (!isAuthenticated || (isAuthenticated && !isAdmin)) {
     return null;
   }
 
@@ -172,19 +171,19 @@ export default function AdminScreen() {
   // Handler for uploading the topic and video
   const uploadTopic = async () => {
     if (!topicTitle || !topicDesc || !video || !topicId) {
-      Alert.alert('Error', 'Please fill in all fields and select a video.');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields and select a video.' });
       return;
     }
     setUploading(true);
     try {
       const result = await uploadAdminTopicWithVideo(topicTitle, topicDesc, video, topicId);
-      Alert.alert('Success', result.message || 'Topic and video uploaded!');
+      Toast.show({ type: 'success', text1: 'Success', text2: result.message || 'Topic and video uploaded successfully!' });
       setTopicTitle('');
       setTopicDesc('');
       setVideo(null);
       setTopicId('');
     } catch (error) {
-      Alert.alert('Upload Failed', error.message);
+      Toast.show({ type: 'error', text1: 'Upload Failed', text2: error.message });
     } finally {
       setUploading(false);
     }
