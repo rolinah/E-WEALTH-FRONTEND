@@ -107,17 +107,22 @@ export default function AdminScreen() {
     }
     setCreatingTopic(true);
     try {
-      // You may need to implement this endpoint in your backend
-      const res = await fetch('http://localhost:3000/admin/create-topic', {
+      const res = await fetch('http://localhost:3000/admin/topic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: newTopicTitle, description: newTopicDesc }),
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Failed to create topic');
+      const data = await res.json();
       Alert.alert('Success', 'Topic created successfully!');
       setNewTopicTitle('');
       setNewTopicDesc('');
-      // Optionally refresh topics list
+      // Optimistically add the new topic to the list
+      setTopics(prev => [
+        ...prev,
+        { id: data.id, title: newTopicTitle, description: newTopicDesc, modules: [] }
+      ]);
+      // Then refetch to ensure full sync with backend
       api.getTopics().then(setTopics);
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -360,6 +365,26 @@ export default function AdminScreen() {
             <Text>Topics Created: {adminData.topicsCreated}</Text>
           </View>
         )}
+        {/* All Topics Section */}
+        <View style={{ backgroundColor: '#e3e3e3', borderRadius: 10, padding: 16, marginBottom: 24, width: '100%', maxWidth: 600 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>All Topics</Text>
+          {topics.length === 0 ? (
+            <Text style={{ color: '#888', fontStyle: 'italic' }}>No topics created yet.</Text>
+          ) : (
+            topics.map(topic => (
+              <View key={topic.id} style={{ marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 8 }}>
+                <Text style={{ fontWeight: 'bold', color: '#101A3D' }}>ID: {topic.id}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{topic.title}</Text>
+                <Text style={{ color: '#555' }}>{topic.description}</Text>
+                {topic.modules && (
+                  <Text style={{ color: '#888', fontSize: 12 }}>
+                    Modules: {topic.modules.length}
+                  </Text>
+                )}
+              </View>
+            ))
+          )}
+        </View>
         {/* Enrollment by Interest Section */}
         {adminData && adminData.interestStats && (
           <View style={styles.enrollmentBox}>

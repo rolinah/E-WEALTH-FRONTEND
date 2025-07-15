@@ -36,3 +36,29 @@ export async function uploadAdminTopicWithVideo(title, description, videoFile, t
     throw error;
   }
 } 
+
+export async function createTopic(title, description) {
+  try {
+    const res = await fetch('http://localhost:3000/admin/topic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Create topic failed');
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+} 
+
+export async function deleteModuleById(moduleId) {
+  try {
+    const res = await fetch(`http://localhost:3000/admin/module/${moduleId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+} 
