@@ -23,18 +23,33 @@ export const AuthProvider = ({ children }) => {
         // Try to load user from AsyncStorage
         const storedUser = await AsyncStorage.getItem('user');
         if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          console.log('[AuthContext] Loaded user from storage:', parsedUser);
+          let parsedUser = null;
+          try {
+            parsedUser = JSON.parse(storedUser);
+          } catch (e) {
+            // Invalid JSON, clear storage
+            await AsyncStorage.removeItem('user');
+            setUser(null);
+            setLoading(false);
+            return;
+          }
+          // TODO: Add token/session validation here if using JWT or session expiry
+          if (parsedUser && parsedUser.email && parsedUser.role) {
+            setUser(parsedUser);
+            console.log('[AuthContext] Loaded user from storage:', parsedUser);
+          } else {
+            // Invalid user object, clear storage
+            await AsyncStorage.removeItem('user');
+            setUser(null);
+          }
         } else {
-          // Optionally, fetch from backend if needed
-          // const currentUser = await api.getCurrentUser();
-          // setUser(currentUser);
           setUser(null);
         }
       } catch (error) {
         console.error('Error initializing user:', error);
         setUser(null);
+        // Optionally clear AsyncStorage on error
+        await AsyncStorage.removeItem('user');
       } finally {
         setLoading(false);
       }
@@ -79,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const user = await api.signIn(email, password);
+      // TODO: Add token/session validation here if needed
       setUser(user);
       // Save user to AsyncStorage
       await AsyncStorage.setItem('user', JSON.stringify(user));
@@ -104,6 +120,10 @@ export const AuthProvider = ({ children }) => {
     return await api.getProfile();
   };
 
+  // Only true if user is a valid object with required fields
+  const isAuthenticated = !!(user && user.email && user.role);
+  const isAdmin = typeof user?.role === 'string' && user.role.trim().toLowerCase() === 'admin';
+
   const value = {
     user,
     loading,
@@ -111,8 +131,8 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     getProfile,
-    isAuthenticated: !!user,
-    isAdmin: typeof user?.role === 'string' && user.role.trim().toLowerCase() === 'admin',
+    isAuthenticated,
+    isAdmin,
   };
 
   if (loading) {
