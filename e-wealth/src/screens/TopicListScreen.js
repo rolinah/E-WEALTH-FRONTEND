@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
-import Colors from '../constants/Colors';
+import { Colors } from '../constants/Colors';
 
 export default function TopicListScreen({ navigation }) {
   const [topics, setTopics] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
-import Colors from '../constants/Colors';
+import { Colors } from '../constants/Colors';
 
 export default function TopicDetailsScreen({ route, navigation }) {
   const { topic } = route.params || {};

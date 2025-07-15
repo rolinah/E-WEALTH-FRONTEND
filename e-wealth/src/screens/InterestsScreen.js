@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { api } from '../services/api';
 import { useRouter } from 'expo-router';
-import Colors from '../constants/Colors';
+import { Colors } from '../constants/Colors';
 
 const interests = [
   { name: 'Business', color: '#FFD600' }, // yellow

@@ -3,7 +3,7 @@ import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator, Touchable
 import { api } from '../services/api';
 import NavigationHelper from '../navigation/NavigationHelper';
 import { LinearGradient } from 'expo-linear-gradient';
-import Colors from '../constants/Colors';
+import { Colors } from '../constants/Colors';
 
 const defaultImage = { uri: 'https://placehold.co/200x200/png' };
 const contentCards = [

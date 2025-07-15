@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import Colors from '../constants/Colors'; // Added import for Colors
+import { Colors } from '../constants/Colors'; // Added import for Colors
 
 export default function ModuleViewerScreen({ route, navigation }) {
   const { module, topic } = route.params || {};
