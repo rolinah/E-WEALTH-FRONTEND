@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { api } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const badgeDefault = require('../assets/images/icon.png');
 
@@ -12,6 +13,9 @@ export default function TopicsDashboardScreen({ navigation }) {
 
   useEffect(() => {
     loadTopics();
+    AsyncStorage.getItem('user').then(u => {
+      console.log('[AuthContext] user in AsyncStorage:', u);
+    });
   }, []);
 
   const loadTopics = async () => {

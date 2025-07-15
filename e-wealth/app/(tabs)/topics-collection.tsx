@@ -1,10 +1,5 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import TopicsCollectionScreen from '../../src/screens/TopicsCollectionScreen';
 
-export default function TopicsCollectionScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Topics Collection</Text>
-    </View>
-  );
+export default function TopicsCollection() {
+  return <TopicsCollectionScreen />;
 } 

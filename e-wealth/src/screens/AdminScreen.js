@@ -94,10 +94,53 @@ export default function AdminScreen() {
     4: ['sam@example.com', 'george@example.com'],
   };
   const router = useRouter();
+  const [newTopicTitle, setNewTopicTitle] = useState('');
+  const [newTopicDesc, setNewTopicDesc] = useState('');
+  const [creatingTopic, setCreatingTopic] = useState(false);
+
+  // Handler for creating a new topic (without video)
+  const createTopic = async () => {
+    if (!newTopicTitle || !newTopicDesc) {
+      Alert.alert('Error', 'Please enter a title and description for the topic.');
+      return;
+    }
+    setCreatingTopic(true);
+    try {
+      // You may need to implement this endpoint in your backend
+      const res = await fetch('http://localhost:3000/admin/create-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTopicTitle, description: newTopicDesc }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to create topic');
+      Alert.alert('Success', 'Topic created successfully!');
+      setNewTopicTitle('');
+      setNewTopicDesc('');
+      // Optionally refresh topics list
+      api.getTopics().then(setTopics);
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setCreatingTopic(false);
+    }
+  };
+
+  // Debug logging
+  console.log('[AdminScreen] isAdmin:', isAdmin, 'isAuthenticated:', isAuthenticated);
+
+  // Only redirect if authenticated and not admin
+  React.useEffect(() => {
+    if (isAuthenticated && !isAdmin) {
+      router.replace('/');
+    }
+  }, [isAuthenticated, isAdmin]);
 
   if (!isAuthenticated) {
-    // Redirect to login
     router.replace('/auth/login');
+    return null;
+  }
+  if (isAuthenticated && !isAdmin) {
+    // Already handled by effect, but return null to avoid rendering
     return null;
   }
 
@@ -239,7 +282,31 @@ export default function AdminScreen() {
         <Text style={{ fontSize: 32, fontWeight: 'bold', color: Colors.light.accent, letterSpacing: 2, marginBottom: 4 }}>Admin Panel</Text>
         <Text style={{ color: '#fff', fontSize: 16, opacity: 0.8 }}>Manage & Analyze</Text>
       </LinearGradient>
-      <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40, paddingHorizontal: 12 }}>
+        {/* Topic Creation Form */}
+        <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 24, elevation: 2, width: 340 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>Create New Topic</Text>
+          <TextInput
+            placeholder="Topic Title"
+            value={newTopicTitle}
+            onChangeText={setNewTopicTitle}
+            style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 12 }}
+          />
+          <TextInput
+            placeholder="Topic Description"
+            value={newTopicDesc}
+            onChangeText={setNewTopicDesc}
+            style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 12, minHeight: 60 }}
+            multiline
+          />
+          <TouchableOpacity
+            style={{ backgroundColor: Colors.light.primary, borderRadius: 8, padding: 14, alignItems: 'center' }}
+            onPress={createTopic}
+            disabled={creatingTopic}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{creatingTopic ? 'Creating...' : 'Create Topic'}</Text>
+          </TouchableOpacity>
+        </View>
         {loading && <ActivityIndicator size="large" color={Colors.light.primary} style={{ marginTop: 20 }} />}
         {error && <Text style={{ color: Colors.light.error, marginBottom: 12 }}>{error}</Text>}
         <View style={styles.analyticsBox}>
