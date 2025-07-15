@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Colors } from '../constants/Colors'; // Added import for Colors
+import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ModuleViewerScreen({ route, navigation }) {
   const { module, topic } = route.params || {};
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const { user } = useAuth ? useAuth() : { user: null };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     Alert.alert(
       'Complete Module',
       'Are you sure you want to mark this module as completed?',
@@ -15,10 +18,29 @@ export default function ModuleViewerScreen({ route, navigation }) {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Complete',
-          onPress: () => {
+          onPress: async () => {
             setCompleted(true);
-            // Here you would update the user's progress via the backend API (MySQL)
-            Alert.alert('Success', 'Module completed!');
+            // Award XP via backend
+            try {
+              const userId = user?.id || (await api.getCurrentUserId?.()) || null;
+              if (userId && module?.id) {
+                const res = await fetch('http://localhost:3000/api/video/completed', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId, moduleId: module.id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  Alert.alert('Success', 'Module completed! 25 XP awarded.');
+                } else {
+                  Alert.alert('Info', data.message || 'Module already completed.');
+                }
+              } else {
+                Alert.alert('Error', 'User or module ID missing.');
+              }
+            } catch (e) {
+              Alert.alert('Error', 'Failed to award XP.');
+            }
             navigation.goBack();
           }
         }

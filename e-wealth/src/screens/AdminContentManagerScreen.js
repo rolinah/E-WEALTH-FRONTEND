@@ -4,6 +4,7 @@ import React from 'react';
 import { View, Text, Button, TextInput, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadAdminTopicWithVideo } from '../services/admin';
+import Toast from 'react-native-toast-message';
 
 export default function AdminContentManagerScreen() {
   // Placeholder state for selected video
@@ -26,18 +27,18 @@ export default function AdminContentManagerScreen() {
   // Handler for uploading the topic and video (to be implemented)
   const uploadTopic = async () => {
     if (!topicTitle || !topicDesc || !video) {
-      Alert.alert('Error', 'Please fill in all fields and select a video.');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields and select a video.' });
       return;
     }
     setLoading(true);
     try {
       const result = await uploadAdminTopicWithVideo(topicTitle, topicDesc, video);
-      Alert.alert('Success', result.message || 'Topic and video uploaded!');
+      Toast.show({ type: 'success', text1: 'Success', text2: result.message || 'Topic and video uploaded successfully!' });
       setTopicTitle('');
       setTopicDesc('');
       setVideo(null);
     } catch (error) {
-      Alert.alert('Upload Failed', error.message);
+      Toast.show({ type: 'error', text1: 'Upload Failed', text2: error.message });
     } finally {
       setLoading(false);
     }
