@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Modal, Platform } from 'react-native';
 import { Video } from 'expo-av';
 import { Colors } from '../../constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const settingsOptions = [
   { name: 'Theme', icon: require('../../assets/images/icon.png') },
@@ -27,58 +28,130 @@ export default function SettingsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [currentExplanation, setCurrentExplanation] = useState('');
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../../assets/images/icon.png')} style={styles.bg} />
-      <Text style={styles.title}>Settings</Text>
-      {settingsOptions.map((opt, idx) => (
-        <TouchableOpacity
-          key={idx}
-          style={styles.optionRow}
-          onPress={() => {
-            setCurrentExplanation(settingsExplanations[opt.name] || 'No explanation available.');
-            setModalVisible(true);
-          }}
-        >
-          <Image source={opt.icon} style={styles.icon} />
-          <Text style={styles.optionText}>{opt.name}</Text>
-        </TouchableOpacity>
-      ))}
-      <Text style={styles.sectionTitle}>;</Text>
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
+    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+      <LinearGradient
+        colors={[Colors.light.primary, '#6FA8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Explanation</Text>
-            <Text style={styles.modalText}>{currentExplanation}</Text>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
+        <Text style={styles.headerTitle}>Settings</Text>
+      </LinearGradient>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.contentBox}>
+          {settingsOptions.map((opt, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.optionRow}
+              onPress={() => {
+                setCurrentExplanation(settingsExplanations[opt.name] || 'No explanation available.');
+                setModalVisible(true);
+              }}
+            >
+              <View style={styles.iconCircle}>
+                <Image source={opt.icon} style={styles.icon} />
+              </View>
+              <Text style={styles.optionText}>{opt.name}</Text>
             </TouchableOpacity>
-          </View>
+          ))}
         </View>
-      </Modal>
-    </ScrollView>
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Explanation</Text>
+              <Text style={styles.modalText}>{currentExplanation}</Text>
+              <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  headerGradient: {
+    width: '100%',
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 36,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    alignItems: 'center',
+    marginBottom: 0,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+  headerTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: Colors.light.accent,
+    letterSpacing: 2,
+    marginBottom: 0,
+    marginTop: 8,
+  },
   container: {
     flexGrow: 1,
-    backgroundColor: Colors.light.background,
     alignItems: 'center',
-    padding: 24,
-    position: 'relative',
+    padding: 32,
+    paddingTop: 32,
+    minHeight: '100%',
+    backgroundColor: Colors.light.background,
   },
-  bg: { position: 'absolute', top: 0, left: 0, width: '100%', height: 300, opacity: 0.15, zIndex: 0 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 16, zIndex: 1 },
-  optionRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 12, marginBottom: 12, width: '100%', maxWidth: 350, zIndex: 1 },
-  icon: { width: 28, height: 28, marginRight: 16 },
-  optionText: { fontSize: 16, color: '#222' },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 24, marginBottom: 8, color: '#fff', textAlign: 'center', zIndex: 1 },
-  video: { width: '100%', height: 180, borderRadius: 12, marginBottom: 20, zIndex: 1 },
+  contentBox: {
+    width: '100%',
+    maxWidth: 480,
+    alignItems: 'center',
+    marginTop: -40,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 24,
+    padding: 32,
+    elevation: 6,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.10,
+    shadowRadius: 18,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 18,
+    width: '100%',
+    maxWidth: 400,
+    elevation: 3,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.light.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 18,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    tintColor: Colors.light.primary,
+  },
+  optionText: {
+    fontSize: 18,
+    color: Colors.light.text,
+    fontWeight: '600',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -90,26 +163,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    width: 300,
+    width: 320,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#222',
+    color: Colors.light.primary,
   },
   modalText: {
     fontSize: 16,
-    color: '#222',
+    color: Colors.light.text,
     marginBottom: 16,
     textAlign: 'center',
   },
   closeButton: {
-    backgroundColor: '#4F8CFF',
+    backgroundColor: Colors.light.primary,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 24,
     alignItems: 'center',
+    marginTop: 8,
   },
   closeButtonText: {
     color: '#fff',

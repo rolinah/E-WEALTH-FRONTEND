@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { Colors } from '../../constants/Colors';
 
-export default function Badge({ label, icon }) {
+export default function Badge({ label, icon, highlight = false }) {
   return (
-    <View style={styles.badge}>
+    <View style={[styles.badge, highlight && { backgroundColor: Colors.light.accent }]}>
       {icon && <Image source={icon} style={styles.icon} />}
       <Text style={styles.label}>{label}</Text>
     </View>
@@ -14,7 +15,7 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.primary,
     borderRadius: 16,
     paddingVertical: 6,
     paddingHorizontal: 14,

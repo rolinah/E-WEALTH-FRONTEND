@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Colors } from '../constants/Colors';
 
 const topics = [
   { name: 'Sales Topic', progress: 13, streaks: 8, items: [
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   badge: {
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // yellow for highlight badge only
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 4,

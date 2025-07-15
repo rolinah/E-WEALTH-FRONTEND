@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
 import { api } from '../services/api';
 import NavigationHelper from '../navigation/NavigationHelper';
+import { LinearGradient } from 'expo-linear-gradient';
+import Colors from '../constants/Colors';
 
 const defaultImage = { uri: 'https://placehold.co/200x200/png' };
 const contentCards = [
@@ -52,11 +54,15 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>E-Wealth Hub</Text>
-        <View style={styles.headerAccent} />
-      </View>
+      <LinearGradient
+        colors={[Colors.light.primary, '#6FA8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ width: '100%', paddingTop: 60, paddingBottom: 32, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, alignItems: 'center', marginBottom: 16 }}
+      >
+        <Text style={{ fontSize: 32, fontWeight: 'bold', color: Colors.light.accent, letterSpacing: 2, marginBottom: 4 }}>E-Wealth Hub</Text>
+        <View style={{ width: 60, height: 5, backgroundColor: Colors.light.accent, borderRadius: 3, marginTop: 6 }} />
+      </LinearGradient>
       {loading && <ActivityIndicator size="large" color="#1A2EFF" style={{ marginTop: 20 }} />}
       {error && <Text style={{ color: 'red', margin: 12 }}>{error}</Text>}
       {/* Stats Card */}
@@ -69,11 +75,11 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.statLabel}>Modules</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: '#FFD600' }]}>{dashboard.quizScore || 0}%</Text>
+              <Text style={styles.statValue}>{dashboard.quizScore || 0}%</Text>
               <Text style={styles.statLabel}>Quiz Score</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: '#FF9900' }]}>{dashboard.streak || 0}</Text>
+              <Text style={styles.statValue}>{dashboard.streak || 0}</Text>
               <Text style={styles.statLabel}>Streak</Text>
             </View>
           </View>
@@ -125,16 +131,16 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.learningPathCard}>
         <Text style={styles.sectionTitle}>Learning Path</Text>
         <TouchableOpacity 
-          style={[styles.pathButton, { backgroundColor: '#1A2EFF' }]}
+          style={[styles.pathButton, { backgroundColor: Colors.light.primary }]}
           onPress={() => NavigationHelper.goToInterests(navigation)}
         >
           <Text style={styles.pathButtonText}>Choose Your Interests</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.pathButton, { backgroundColor: '#FFD600' }]}
+          style={[styles.pathButton, { backgroundColor: Colors.light.accent }]}
           onPress={() => NavigationHelper.goToTopicsCollection(navigation)}
         >
-          <Text style={[styles.pathButtonText, { color: '#1A2EFF' }]}>Browse Topics Collection</Text>
+          <Text style={[styles.pathButtonText, { color: Colors.light.primary }]}>Browse Topics Collection</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -142,21 +148,19 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F6FA' },
+  container: { flex: 1, backgroundColor: Colors.light.background },
   contentContainer: { padding: 0, alignItems: 'center' },
   header: {
     width: '100%',
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 18,
+    backgroundColor: 'transparent',
+    paddingTop: 0,
+    paddingBottom: 0,
     alignItems: 'center',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    marginBottom: 8,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    marginBottom: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
   },
   headerTitle: {
     color: '#1A2EFF',
@@ -169,7 +173,7 @@ const styles = StyleSheet.create({
   headerAccent: {
     width: 60,
     height: 5,
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.primary,
     borderRadius: 3,
     marginTop: 6,
   },
@@ -181,10 +185,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: '92%',
     alignSelf: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   statsTitle: {
     fontSize: 18,
@@ -263,14 +267,14 @@ const styles = StyleSheet.create({
   actionCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 14,
     padding: 12,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   actionCardImage: { width: 60, height: 60, borderRadius: 8, marginRight: 16 },
   actionCardText: { flex: 1 },

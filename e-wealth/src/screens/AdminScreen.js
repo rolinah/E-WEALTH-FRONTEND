@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, TouchableOpacity, FlatList, Picker } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Button, TextInput, Alert, TouchableOpacity, FlatList, Picker, ScrollView } from 'react-native';
 import { api } from '../services/api';
 import * as DocumentPicker from 'expo-document-picker';
 import { uploadAdminTopicWithVideo } from '../services/admin';
@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import { BarChart, LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 const screenWidth = Dimensions.get('window').width;
 
 function printCertificate({ userName, moduleName }) {
@@ -228,205 +229,215 @@ export default function AdminScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Admin Panel</Text>
-      {loading && <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />}
-      {error && <Text style={{ color: 'red', marginBottom: 12 }}>{error}</Text>}
-      <View style={styles.analyticsBox}>
-        <Text style={styles.statsTitle}>Admin Analytics Dashboard</Text>
-        {/* Most Popular Modules */}
-        <Text style={styles.analyticsLabel}>Most Popular Modules</Text>
-        <BarChart
-          data={{
-            labels: analytics.popularModules.map(m => m.name),
-            datasets: [{ data: analytics.popularModules.map(m => m.count) }],
-          }}
-          width={screenWidth - 48}
-          height={180}
-          chartConfig={chartConfig}
-          fromZero
-          showValuesOnTopOfBars
-          style={{ marginBottom: 16, borderRadius: 12 }}
-        />
-        {/* Active Users Over Time */}
-        <Text style={styles.analyticsLabel}>Active Users (Last 7 Weeks)</Text>
-        <LineChart
-          data={{
-            labels: analytics.weeks,
-            datasets: [{ data: analytics.activeUsers }],
-          }}
-          width={screenWidth - 48}
-          height={180}
-          chartConfig={chartConfig}
-          bezier
-          style={{ marginBottom: 16, borderRadius: 12 }}
-        />
-        {/* Average Completion Time */}
-        <Text style={styles.analyticsLabel}>Average Completion Time (days)</Text>
-        <BarChart
-          data={{
-            labels: analytics.avgCompletion.map(m => m.name),
-            datasets: [{ data: analytics.avgCompletion.map(m => m.time) }],
-          }}
-          width={screenWidth - 48}
-          height={180}
-          chartConfig={chartConfig}
-          fromZero
-          showValuesOnTopOfBars
-          style={{ marginBottom: 8, borderRadius: 12 }}
-        />
-      </View>
-      {adminData && (
-        <View style={styles.statsBox}>
-          <Text style={styles.statsTitle}>Admin Stats</Text>
-          <Text>Total Users: {adminData.totalUsers}</Text>
-          <Text>Active Users: {adminData.activeUsers}</Text>
-          <Text>Topics Created: {adminData.topicsCreated}</Text>
+    <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
+      <LinearGradient
+        colors={[Colors.light.primary, '#6FA8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ paddingTop: 60, paddingBottom: 32, paddingHorizontal: 0, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, alignItems: 'center', marginBottom: 16 }}
+      >
+        <Text style={{ fontSize: 32, fontWeight: 'bold', color: Colors.light.accent, letterSpacing: 2, marginBottom: 4 }}>Admin Panel</Text>
+        <Text style={{ color: '#fff', fontSize: 16, opacity: 0.8 }}>Manage & Analyze</Text>
+      </LinearGradient>
+      <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>
+        {loading && <ActivityIndicator size="large" color={Colors.light.primary} style={{ marginTop: 20 }} />}
+        {error && <Text style={{ color: Colors.light.error, marginBottom: 12 }}>{error}</Text>}
+        <View style={styles.analyticsBox}>
+          <Text style={styles.statsTitle}>Admin Analytics Dashboard</Text>
+          {/* Most Popular Modules */}
+          <Text style={styles.analyticsLabel}>Most Popular Modules</Text>
+          <BarChart
+            data={{
+              labels: analytics.popularModules.map(m => m.name),
+              datasets: [{ data: analytics.popularModules.map(m => m.count) }],
+            }}
+            width={screenWidth - 48}
+            height={180}
+            chartConfig={chartConfig}
+            fromZero
+            showValuesOnTopOfBars
+            style={{ marginBottom: 16, borderRadius: 12 }}
+          />
+          {/* Active Users Over Time */}
+          <Text style={styles.analyticsLabel}>Active Users (Last 7 Weeks)</Text>
+          <LineChart
+            data={{
+              labels: analytics.weeks,
+              datasets: [{ data: analytics.activeUsers }],
+            }}
+            width={screenWidth - 48}
+            height={180}
+            chartConfig={chartConfig}
+            bezier
+            style={{ marginBottom: 16, borderRadius: 12 }}
+          />
+          {/* Average Completion Time */}
+          <Text style={styles.analyticsLabel}>Average Completion Time (days)</Text>
+          <BarChart
+            data={{
+              labels: analytics.avgCompletion.map(m => m.name),
+              datasets: [{ data: analytics.avgCompletion.map(m => m.time) }],
+            }}
+            width={screenWidth - 48}
+            height={180}
+            chartConfig={chartConfig}
+            fromZero
+            showValuesOnTopOfBars
+            style={{ marginBottom: 8, borderRadius: 12 }}
+          />
         </View>
-      )}
-      {/* Enrollment by Interest Section */}
-      {adminData && adminData.interestStats && (
-        <View style={styles.enrollmentBox}>
-          <Text style={styles.statsTitle}>Enrollment by Interest</Text>
-          {adminData.interestStats.map((interest, idx) => (
-            <View key={idx} style={styles.interestRow}>
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => setExpandedInterest(expandedInterest === interest.name ? null : interest.name)}>
-                <Text style={styles.interestName}>{interest.name}</Text>
-                <Text style={styles.interestCount}>{interest.count} enrolled</Text>
-              </TouchableOpacity>
-              {expandedInterest === interest.name && (
-                <View style={styles.expandedBox}>
-                  <Text style={styles.expandedTitle}>Users in {interest.name}</Text>
-                  {(interestUsers[interest.name] || []).length === 0 && <Text style={{ color: '#888', marginBottom: 8 }}>No users enrolled.</Text>}
-                  {(interestUsers[interest.name] || []).map((user, i) => (
-                    <View key={i} style={styles.userRow}>
-                      <Text style={styles.userEmail}>{user}</Text>
-                      <TouchableOpacity onPress={() => handleRemoveUser(interest.name, user)}>
-                        <Text style={styles.removeBtn}>Remove</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                  <View style={styles.addUserRow}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="User email"
-                      value={userInputs[interest.name] || ''}
-                      onChangeText={text => setUserInputs(prev => ({ ...prev, [interest.name]: text }))}
-                    />
-                    <TouchableOpacity style={styles.addBtn} onPress={() => handleAddUser(interest.name)}>
-                      <Text style={{ color: '#fff', fontWeight: 'bold' }}>Add</Text>
-                    </TouchableOpacity>
-                  </View>
-                  {/* Learning Materials Section */}
-                  <View style={styles.materialsBox}>
-                    <Text style={styles.expandedTitle}>Learning Materials</Text>
-                    {(interestMaterials[interest.name] || []).length === 0 && <Text style={{ color: '#888', marginBottom: 8 }}>No materials yet.</Text>}
-                    {(interestMaterials[interest.name] || []).map((mat, i) => (
-                      <View key={i} style={styles.materialRow}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.materialTitle}>{mat.title}</Text>
-                          <Text style={styles.materialDesc}>{mat.desc}</Text>
-                          <Text style={styles.materialLink}>{mat.link}</Text>
-                        </View>
-                        <TouchableOpacity onPress={() => handleRemoveMaterial(interest.name, i)}>
+        {adminData && (
+          <View style={styles.statsBox}>
+            <Text style={styles.statsTitle}>Admin Stats</Text>
+            <Text>Total Users: {adminData.totalUsers}</Text>
+            <Text>Active Users: {adminData.activeUsers}</Text>
+            <Text>Topics Created: {adminData.topicsCreated}</Text>
+          </View>
+        )}
+        {/* Enrollment by Interest Section */}
+        {adminData && adminData.interestStats && (
+          <View style={styles.enrollmentBox}>
+            <Text style={styles.statsTitle}>Enrollment by Interest</Text>
+            {adminData.interestStats.map((interest, idx) => (
+              <View key={idx} style={styles.interestRow}>
+                <TouchableOpacity style={{ flex: 1 }} onPress={() => setExpandedInterest(expandedInterest === interest.name ? null : interest.name)}>
+                  <Text style={styles.interestName}>{interest.name}</Text>
+                  <Text style={styles.interestCount}>{interest.count} enrolled</Text>
+                </TouchableOpacity>
+                {expandedInterest === interest.name && (
+                  <View style={styles.expandedBox}>
+                    <Text style={styles.expandedTitle}>Users in {interest.name}</Text>
+                    {(interestUsers[interest.name] || []).length === 0 && <Text style={{ color: '#888', marginBottom: 8 }}>No users enrolled.</Text>}
+                    {(interestUsers[interest.name] || []).map((user, i) => (
+                      <View key={i} style={styles.userRow}>
+                        <Text style={styles.userEmail}>{user}</Text>
+                        <TouchableOpacity onPress={() => handleRemoveUser(interest.name, user)}>
                           <Text style={styles.removeBtn}>Remove</Text>
                         </TouchableOpacity>
                       </View>
                     ))}
-                    <View style={styles.addMaterialRow}>
+                    <View style={styles.addUserRow}>
                       <TextInput
                         style={styles.input}
-                        placeholder="Material Title"
-                        value={materialInputs[interest.name]?.title || ''}
-                        onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], title: text } }))}
+                        placeholder="User email"
+                        value={userInputs[interest.name] || ''}
+                        onChangeText={text => setUserInputs(prev => ({ ...prev, [interest.name]: text }))}
                       />
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Description (optional)"
-                        value={materialInputs[interest.name]?.desc || ''}
-                        onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], desc: text } }))}
-                      />
-                      <TextInput
-                        style={styles.input}
-                        placeholder="File link (URL)"
-                        value={materialInputs[interest.name]?.link || ''}
-                        onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], link: text } }))}
-                      />
-                      <TouchableOpacity style={styles.addBtn} onPress={() => handleAddMaterial(interest.name)}>
-                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Add Material</Text>
+                      <TouchableOpacity style={styles.addBtn} onPress={() => handleAddUser(interest.name)}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Add</Text>
                       </TouchableOpacity>
                     </View>
+                    {/* Learning Materials Section */}
+                    <View style={styles.materialsBox}>
+                      <Text style={styles.expandedTitle}>Learning Materials</Text>
+                      {(interestMaterials[interest.name] || []).length === 0 && <Text style={{ color: '#888', marginBottom: 8 }}>No materials yet.</Text>}
+                      {(interestMaterials[interest.name] || []).map((mat, i) => (
+                        <View key={i} style={styles.materialRow}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.materialTitle}>{mat.title}</Text>
+                            <Text style={styles.materialDesc}>{mat.desc}</Text>
+                            <Text style={styles.materialLink}>{mat.link}</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => handleRemoveMaterial(interest.name, i)}>
+                            <Text style={styles.removeBtn}>Remove</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                      <View style={styles.addMaterialRow}>
+                        <TextInput
+                          style={styles.input}
+                          placeholder="Material Title"
+                          value={materialInputs[interest.name]?.title || ''}
+                          onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], title: text } }))}
+                        />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="Description (optional)"
+                          value={materialInputs[interest.name]?.desc || ''}
+                          onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], desc: text } }))}
+                        />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="File link (URL)"
+                          value={materialInputs[interest.name]?.link || ''}
+                          onChangeText={text => setMaterialInputs(prev => ({ ...prev, [interest.name]: { ...prev[interest.name], link: text } }))}
+                        />
+                        <TouchableOpacity style={styles.addBtn} onPress={() => handleAddMaterial(interest.name)}>
+                          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Add Material</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              )}
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+        {/* Content Management Section */}
+        <View style={styles.contentBox}>
+          <Text style={styles.statsTitle}>Upload Video to Topic</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Topic ID"
+            value={topicId}
+            onChangeText={setTopicId}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Module Title"
+            value={topicTitle}
+            onChangeText={setTopicTitle}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Module Description"
+            value={topicDesc}
+            onChangeText={setTopicDesc}
+            multiline
+          />
+          <Button title="Pick Video" onPress={pickVideo} />
+          {video && <Text style={{ marginTop: 8 }}>Selected: {video.name}</Text>}
+          <Button
+            title={uploading ? 'Uploading...' : 'Upload Topic & Video'}
+            onPress={uploadTopic}
+            disabled={!topicTitle || !topicDesc || !video || !topicId || uploading}
+          />
+        </View>
+        {/* Certificates Section (Module selection + users who completed) */}
+        <View style={styles.certificateBox}>
+          <Text style={styles.statsTitle}>Print Certificates</Text>
+          <Text style={{ marginBottom: 8 }}>Select Module:</Text>
+          <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, marginBottom: 12 }}>
+            <Picker
+              selectedValue={selectedModule}
+              onValueChange={setSelectedModule}
+              style={{ width: 250 }}
+            >
+              <Picker.Item label="Select a module..." value="" />
+              {topics.map((topic) => (
+                <Picker.Item key={topic.id} label={topic.title} value={topic.id} />
+              ))}
+            </Picker>
+          </View>
+          {selectedModule && (mockCompletions[selectedModule] || []).length === 0 && (
+            <Text style={{ color: '#888', marginBottom: 8 }}>No users completed this module.</Text>
+          )}
+          {selectedModule && (mockCompletions[selectedModule] || []).map((userEmail, i) => (
+            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={{ flex: 1 }}>{userEmail}</Text>
+              <TouchableOpacity
+                style={{ backgroundColor: Colors.light.primary, padding: 8, borderRadius: 8 }}
+                onPress={() => {
+                  const moduleName = topics.find(t => t.id === selectedModule)?.title || 'Module';
+                  printCertificate({ userName: userEmail, moduleName });
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Print Certificate</Text>
+              </TouchableOpacity>
             </View>
           ))}
         </View>
-      )}
-      {/* Content Management Section */}
-      <View style={styles.contentBox}>
-        <Text style={styles.statsTitle}>Upload Video to Topic</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Topic ID"
-          value={topicId}
-          onChangeText={setTopicId}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Module Title"
-          value={topicTitle}
-          onChangeText={setTopicTitle}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Module Description"
-          value={topicDesc}
-          onChangeText={setTopicDesc}
-          multiline
-        />
-        <Button title="Pick Video" onPress={pickVideo} />
-        {video && <Text style={{ marginTop: 8 }}>Selected: {video.name}</Text>}
-        <Button
-          title={uploading ? 'Uploading...' : 'Upload Topic & Video'}
-          onPress={uploadTopic}
-          disabled={!topicTitle || !topicDesc || !video || !topicId || uploading}
-        />
-      </View>
-      {/* Certificates Section (Module selection + users who completed) */}
-      <View style={styles.certificateBox}>
-        <Text style={styles.statsTitle}>Print Certificates</Text>
-        <Text style={{ marginBottom: 8 }}>Select Module:</Text>
-        <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, marginBottom: 12 }}>
-          <Picker
-            selectedValue={selectedModule}
-            onValueChange={setSelectedModule}
-            style={{ width: 250 }}
-          >
-            <Picker.Item label="Select a module..." value="" />
-            {topics.map((topic) => (
-              <Picker.Item key={topic.id} label={topic.title} value={topic.id} />
-            ))}
-          </Picker>
-        </View>
-        {selectedModule && (mockCompletions[selectedModule] || []).length === 0 && (
-          <Text style={{ color: '#888', marginBottom: 8 }}>No users completed this module.</Text>
-        )}
-        {selectedModule && (mockCompletions[selectedModule] || []).map((userEmail, i) => (
-          <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-            <Text style={{ flex: 1 }}>{userEmail}</Text>
-            <TouchableOpacity
-              style={{ backgroundColor: '#1A2EFF', padding: 8, borderRadius: 8 }}
-              onPress={() => {
-                const moduleName = topics.find(t => t.id === selectedModule)?.title || 'Module';
-                printCertificate({ userName: userEmail, moduleName });
-              }}
-            >
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Print Certificate</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -435,20 +446,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.light.primary,
+    marginBottom: 8,
   },
   statsBox: {
     marginTop: 24,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   statsTitle: {
     fontSize: 18,
@@ -458,11 +472,14 @@ const styles = StyleSheet.create({
   contentBox: {
     marginTop: 32,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     width: 340,
-    elevation: 2,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   input: {
     backgroundColor: '#f5f5f5',
@@ -477,11 +494,14 @@ const styles = StyleSheet.create({
   enrollmentBox: {
     marginTop: 24,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     width: 340,
-    elevation: 2,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   interestRow: {
     flexDirection: 'row',
@@ -587,10 +607,10 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 420,
     alignSelf: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   analyticsBox: {
     backgroundColor: '#fff',
@@ -601,10 +621,10 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    elevation: 4,
+    shadowColor: '#1A2EFF',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   analyticsLabel: {
     fontSize: 15,

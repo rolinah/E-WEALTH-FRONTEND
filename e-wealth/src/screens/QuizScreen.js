@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import Colors from '../constants/Colors'; // Added import for Colors
 
 export default function QuizScreen({ route, navigation }) {
   const { topic } = route.params || {};
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   },
   progress: {
     height: '100%',
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // yellow for progress only
   },
   resultsCard: {
     backgroundColor: '#fff',
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
   percentageText: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFD600',
+    color: Colors.light.accent,
     marginBottom: 30,
   },
   resultActions: {
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   finishButton: {
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // yellow for primary action
     borderRadius: 8,
     padding: 15,
     minWidth: 100,

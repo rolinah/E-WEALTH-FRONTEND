@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Colors } from '../../constants/Colors';
 
 export default function XPProgressBar({ xp = 0, maxXp = 100 }) {
   const percent = Math.min(100, Math.round((xp / maxXp) * 100));
@@ -15,7 +16,7 @@ export default function XPProgressBar({ xp = 0, maxXp = 100 }) {
 
 const styles = StyleSheet.create({
   container: { marginVertical: 12 },
-  label: { color: '#fff', fontWeight: 'bold', marginBottom: 4, textAlign: 'center' },
+  label: { color: Colors.light.text, fontWeight: 'bold', marginBottom: 4, textAlign: 'center' },
   barBackground: {
     width: '100%',
     height: 16,
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
   },
   barFill: {
     height: 16,
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // yellow for progress only
     borderRadius: 8,
   },
 }); 

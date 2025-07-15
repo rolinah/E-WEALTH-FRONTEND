@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { api } from '../services/api';
 import { useRouter } from 'expo-router';
+import Colors from '../constants/Colors';
 
 const interests = [
   { name: 'Business', color: '#FFD600' }, // yellow
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 10,
-    color: '#FFD600',
+    color: Colors.light.primary,
     textAlign: 'center',
   },
   sectionDesc: {
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     maxWidth: 360,
   },
   saveButton: {
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // keep yellow for primary action
     borderRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 32,
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveMessage: {
-    color: '#FFD600',
+    color: Colors.light.accent,
     fontSize: 15,
     textAlign: 'center',
     marginBottom: 12,

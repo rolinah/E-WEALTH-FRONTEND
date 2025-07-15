@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
+import Colors from '../constants/Colors';
 
 export default function TopicListScreen({ navigation }) {
   const [topics, setTopics] = useState([]);
@@ -109,8 +110,8 @@ const styles = StyleSheet.create({
   },
   topicCategory: {
     fontSize: 12,
-    color: '#FFD600',
-    backgroundColor: '#FFD60020',
+    color: Colors.light.primary,
+    backgroundColor: '#E3E6F0', // subtle gray background
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,

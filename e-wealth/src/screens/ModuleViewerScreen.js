@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import Colors from '../constants/Colors'; // Added import for Colors
 
 export default function ModuleViewerScreen({ route, navigation }) {
   const { module, topic } = route.params || {};
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
   },
   duration: {
     fontSize: 14,
-    color: '#FFD600',
+    color: Colors.light.primary,
     fontWeight: 'bold',
   },
   content: {
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
   },
   progress: {
     height: '100%',
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // yellow for progress only
   },
   videoSection: {
     marginBottom: 20,
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   nextButton: {
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // yellow for primary action
   },
   buttonText: {
     color: '#fff',

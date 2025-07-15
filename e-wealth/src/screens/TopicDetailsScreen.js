@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
+import Colors from '../constants/Colors';
 
 export default function TopicDetailsScreen({ route, navigation }) {
   const { topic } = route.params || {};
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
   },
   stats: {
     fontSize: 14,
-    color: '#FFD600',
+    color: Colors.light.primary,
     fontWeight: 'bold',
   },
   errorText: {
@@ -177,20 +178,20 @@ const styles = StyleSheet.create({
   },
   moduleDuration: {
     fontSize: 12,
-    color: '#FFD600',
+    color: Colors.light.primary,
     fontWeight: 'bold',
   },
   actionsSection: {
     padding: 20,
   },
   quizButton: {
-    backgroundColor: '#FFD600',
+    backgroundColor: Colors.light.accent, // keep yellow for primary action
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',
   },
   quizButtonText: {
-    color: '#222',
+    color: Colors.light.text,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -229,11 +230,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     elevation: 1,
     borderLeftWidth: 4,
-    borderLeftColor: '#FFD600',
+    borderLeftColor: Colors.light.accent, // keep yellow for highlight
   },
   resourceType: {
     fontSize: 12,
-    color: '#FFD600',
+    color: Colors.light.accent,
     fontWeight: 'bold',
   },
   resourceTitle: {
