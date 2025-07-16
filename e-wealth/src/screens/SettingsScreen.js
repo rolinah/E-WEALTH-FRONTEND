@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Pressable, Modal, Platform } from 'react-native';
 import { Video } from 'expo-av';
 import { Colors } from '../../constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.contentBox}>
           {settingsOptions.map((opt, idx) => (
-            <TouchableOpacity
+            <Pressable
               key={idx}
               style={styles.optionRow}
               onPress={() => {
@@ -49,10 +49,10 @@ export default function SettingsScreen() {
               }}
             >
               <View style={styles.iconCircle}>
-                <Image source={opt.icon} style={styles.icon} />
+                <Image source={opt.icon} style={[styles.icon, { tintColor: Colors.light.primary }]} />
               </View>
               <Text style={styles.optionText}>{opt.name}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
         <Modal
@@ -65,9 +65,9 @@ export default function SettingsScreen() {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Explanation</Text>
               <Text style={styles.modalText}>{currentExplanation}</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </Modal>
@@ -145,7 +145,6 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
-    tintColor: Colors.light.primary,
   },
   optionText: {
     fontSize: 18,

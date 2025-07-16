@@ -9,6 +9,7 @@ import { api } from '../services/api';
 import { deleteModuleById } from '../services/admin';
 import { Video } from 'expo-av';
 import { useRouter } from 'expo-router';
+import { Picker } from '@react-native-picker/picker';
 
 export default function AdminContentManagerScreen() {
   // Placeholder state for selected video
@@ -145,16 +146,16 @@ export default function AdminContentManagerScreen() {
         <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Upload Video to Topic</Text>
         <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ddd', marginBottom: 8, width: '100%' }}>
           <Text style={{ margin: 8, fontWeight: 'bold' }}>Select Topic:</Text>
-          <select
-            style={{ width: '100%', padding: 8, borderRadius: 6, borderColor: '#ccc', marginBottom: 8 }}
-            value={selectedTopicId}
-            onChange={e => setSelectedTopicId(e.target.value)}
+          <Picker
+            selectedValue={selectedTopicId}
+            style={{ width: '100%', height: 44 }}
+            onValueChange={(itemValue) => setSelectedTopicId(itemValue)}
           >
-            <option value="">-- Select Topic --</option>
+            <Picker.Item label="-- Select Topic --" value="" />
             {topics.map(topic => (
-              <option key={topic.id} value={topic.id}>{topic.title} (ID: {topic.id})</option>
+              <Picker.Item key={topic.id} label={`${topic.title} (ID: ${topic.id})`} value={topic.id} />
             ))}
-          </select>
+          </Picker>
         </View>
         <Button title="Pick Video" onPress={pickVideo} />
         {video && (
