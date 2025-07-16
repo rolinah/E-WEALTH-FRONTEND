@@ -12,6 +12,7 @@ import { Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Toast from 'react-native-toast-message';
 const screenWidth = Dimensions.get('window').width;
+const maxSectionWidth = 600;
 
 function printCertificate({ userName, moduleName }) {
   const date = new Date().toLocaleDateString();
@@ -147,6 +148,15 @@ export default function AdminScreen() {
     }));
   };
 
+  // Remove user from interest (mock)
+  const handleDisqualifyUser = (interest, email) => {
+    setInterestUsers((prev) => ({
+      ...prev,
+      [interest]: prev[interest].filter((u) => u !== email),
+    }));
+    Toast.show({ type: 'success', text1: 'User Disqualified', text2: `${email} has been disqualified from ${interest}` });
+  };
+
   // Add material to interest (mock)
   const handleAddMaterial = (interest) => {
     const mat = materialInputs[interest] || {};
@@ -209,6 +219,13 @@ export default function AdminScreen() {
     useShadowColorFromDataset: false,
   };
 
+  // Add mock admin stats for demonstration
+  const totalUsers = adminData?.totalUsers || 42;
+  const activeUsers = adminData?.activeUsers || 18;
+  const topicsCreated = adminData?.topicsCreated || topics.length;
+  const totalCourses = topics.length;
+  const totalModules = topics.reduce((sum, t) => sum + (t.modules ? t.modules.length : 0), 0);
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.light.background }}>
       <LinearGradient
@@ -223,8 +240,8 @@ export default function AdminScreen() {
       <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40, paddingHorizontal: 12 }}>
         {loading && <ActivityIndicator size="large" color={Colors.light.primary} style={{ marginTop: 20 }} />}
         {error && <Text style={{ color: Colors.light.error, marginBottom: 12 }}>{error}</Text>}
-        <View style={styles.analyticsBox}>
-          <Text style={styles.statsTitle}>Admin Analytics Dashboard</Text>
+        <View style={[styles.analyticsBox, { maxWidth: maxSectionWidth, width: '100%', alignSelf: 'center', marginTop: 24 }]}>
+          <Text style={[styles.statsTitle, { fontSize: 22, color: Colors.light.primary, marginBottom: 16 }]}>Admin Analytics Dashboard</Text>
           {/* Most Popular Modules */}
           <Text style={styles.analyticsLabel}>Most Popular Modules</Text>
           <BarChart
@@ -232,7 +249,7 @@ export default function AdminScreen() {
               labels: analytics.popularModules.map(m => m.name),
               datasets: [{ data: analytics.popularModules.map(m => m.count) }],
             }}
-            width={screenWidth - 48}
+            width={Math.min(screenWidth - 32, 560)}
             height={180}
             chartConfig={chartConfig}
             fromZero
@@ -246,7 +263,7 @@ export default function AdminScreen() {
               labels: analytics.weeks,
               datasets: [{ data: analytics.activeUsers }],
             }}
-            width={screenWidth - 48}
+            width={Math.min(screenWidth - 32, 560)}
             height={180}
             chartConfig={chartConfig}
             bezier
@@ -259,7 +276,7 @@ export default function AdminScreen() {
               labels: analytics.avgCompletion.map(m => m.name),
               datasets: [{ data: analytics.avgCompletion.map(m => m.time) }],
             }}
-            width={screenWidth - 48}
+            width={Math.min(screenWidth - 32, 560)}
             height={180}
             chartConfig={chartConfig}
             fromZero
@@ -268,16 +285,18 @@ export default function AdminScreen() {
           />
         </View>
         {adminData && (
-          <View style={styles.statsBox}>
-            <Text style={styles.statsTitle}>Admin Stats</Text>
-            <Text>Total Users: {adminData.totalUsers}</Text>
-            <Text>Active Users: {adminData.activeUsers}</Text>
-            <Text>Topics Created: {adminData.topicsCreated}</Text>
+          <View style={[styles.statsBox, { maxWidth: maxSectionWidth, width: '100%', alignSelf: 'center', marginTop: 24 }]}>
+            <Text style={[styles.statsTitle, { fontSize: 20, color: Colors.light.primary, marginBottom: 12 }]}>Admin Stats</Text>
+            <Text>Total Users: {totalUsers}</Text>
+            <Text>Active Users: {activeUsers}</Text>
+            <Text>Courses Registered: {totalCourses}</Text>
+            <Text>Total Modules: {totalModules}</Text>
+            <Text>Topics Created: {topicsCreated}</Text>
           </View>
         )}
         {/* All Topics Section */}
-        <View style={{ backgroundColor: '#e3e3e3', borderRadius: 10, padding: 16, marginBottom: 24, width: '100%', maxWidth: 600 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>All Topics</Text>
+        <View style={{ backgroundColor: '#e3e3e3', borderRadius: 10, padding: 16, marginBottom: 32, width: '100%', maxWidth: maxSectionWidth, alignSelf: 'center' }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: Colors.light.primary }}>All Topics</Text>
           {topics.length === 0 ? (
             <Text style={{ color: '#888', fontStyle: 'italic' }}>No topics created yet.</Text>
           ) : (
@@ -297,8 +316,8 @@ export default function AdminScreen() {
         </View>
         {/* Enrollment by Interest Section */}
         {adminData && adminData.interestStats && (
-          <View style={styles.enrollmentBox}>
-            <Text style={styles.statsTitle}>Enrollment by Interest</Text>
+          <View style={[styles.enrollmentBox, { maxWidth: maxSectionWidth, width: '100%', alignSelf: 'center', marginTop: 24 }]}>
+            <Text style={[styles.statsTitle, { fontSize: 20, color: Colors.light.primary, marginBottom: 12 }]}>Enrollment by Interest</Text>
             {adminData.interestStats.map((interest, idx) => (
               <View key={idx} style={styles.interestRow}>
                 <TouchableOpacity style={{ flex: 1 }} onPress={() => setExpandedInterest(expandedInterest === interest.name ? null : interest.name)}>
@@ -312,8 +331,8 @@ export default function AdminScreen() {
                     {(interestUsers[interest.name] || []).map((user, i) => (
                       <View key={i} style={styles.userRow}>
                         <Text style={styles.userEmail}>{user}</Text>
-                        <TouchableOpacity onPress={() => handleRemoveUser(interest.name, user)}>
-                          <Text style={styles.removeBtn}>Remove</Text>
+                        <TouchableOpacity onPress={() => handleDisqualifyUser(interest.name, user)}>
+                          <Text style={styles.removeBtn}>Disqualify</Text>
                         </TouchableOpacity>
                       </View>
                     ))}
@@ -375,8 +394,8 @@ export default function AdminScreen() {
           </View>
         )}
         {/* Content Management Section */}
-        <View style={styles.contentBox}>
-          <Text style={styles.statsTitle}>Upload Video to Topic</Text>
+        <View style={[styles.contentBox, { maxWidth: maxSectionWidth, width: '100%', alignSelf: 'center', marginTop: 32 }]}>
+          <Text style={[styles.statsTitle, { fontSize: 20, color: Colors.light.primary, marginBottom: 12 }]}>Upload Video to Topic</Text>
           <TextInput
             style={styles.input}
             placeholder="Topic ID"
@@ -405,8 +424,8 @@ export default function AdminScreen() {
           />
         </View>
         {/* Certificates Section (Module selection + users who completed) */}
-        <View style={styles.certificateBox}>
-          <Text style={styles.statsTitle}>Print Certificates</Text>
+        <View style={[styles.certificateBox, { maxWidth: 420, width: '100%', alignSelf: 'center', marginTop: 32 }]}>
+          <Text style={[styles.statsTitle, { fontSize: 20, color: Colors.light.primary, marginBottom: 12 }]}>Print Certificates</Text>
           <Text style={{ marginBottom: 8 }}>Select Module:</Text>
           <View style={{ backgroundColor: '#f5f5f5', borderRadius: 8, marginBottom: 12 }}>
             <Picker
