@@ -17,14 +17,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // TEMP: Always clear AsyncStorage on mount for debugging
-  useEffect(() => {
-    (async () => {
-      await AsyncStorage.clear();
-      console.log('[AuthContext] Cleared AsyncStorage on mount (debug)');
-    })();
-  }, []);
-
   useEffect(() => {
     const initializeUser = async () => {
       try {
