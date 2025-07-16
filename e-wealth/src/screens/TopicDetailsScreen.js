@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
 import { Colors } from '../constants/Colors';
+import { Video } from 'expo-av';
 
 export default function TopicDetailsScreen({ route, navigation }) {
   const { topic } = route.params || {};
@@ -55,7 +56,7 @@ export default function TopicDetailsScreen({ route, navigation }) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{topic.name}</Text>
+        <Text style={styles.title}>{topic.name || topic.title}</Text>
         <Text style={styles.description}>{topic.description}</Text>
         <Text style={styles.stats}>
           Estimated Time: {topic.estimatedHours || 0} hours | 
@@ -86,10 +87,20 @@ export default function TopicDetailsScreen({ route, navigation }) {
 
       <View style={styles.videoSection}>
         <Text style={styles.sectionTitle}>Introduction Video</Text>
-        <View style={styles.videoPlaceholder}>
-          <Text style={styles.placeholderText}>Introduction video will appear here</Text>
-          <Text style={styles.placeholderSubtext}>Learn about this topic</Text>
-        </View>
+        {topic.modules && topic.modules[0] && topic.modules[0].video ? (
+          <Video
+            source={{ uri: topic.modules[0].video }}
+            style={{ width: '100%', height: 200, borderRadius: 12, backgroundColor: '#000' }}
+            useNativeControls
+            resizeMode="contain"
+            accessibilityLabel={`Video for ${topic.modules[0].title}`}
+          />
+        ) : (
+          <View style={styles.videoPlaceholder}>
+            <Text style={styles.placeholderText}>Introduction video will appear here</Text>
+            <Text style={styles.placeholderSubtext}>Learn about this topic</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.resourcesSection}>

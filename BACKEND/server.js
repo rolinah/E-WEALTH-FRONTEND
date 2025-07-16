@@ -355,13 +355,40 @@ app.get('/', (req, res) => res.send('MySQL backend running!'));
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// Admin: Upload video and assign to topic/module
+// Admin: Create topic and upload video in one step
+app.post('/admin/create-topic-with-video', upload.single('video'), async (req, res) => {
+  const { title, description, duration, type } = req.body;
+  if (!req.file || !title) {
+    return res.status(400).json({ error: 'Missing required fields or video file' });
+  }
+  const videoUrl = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`;
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    // Create topic
+    const [topicResult] = await conn.query('INSERT INTO topics (title, description) VALUES (?, ?)', [title, description || '']);
+    const topicId = topicResult.insertId;
+    // Create module for the topic
+    await conn.query(
+      'INSERT INTO modules (topic_id, title, content, duration, type, video) VALUES (?, ?, ?, ?, ?, ?)',
+      [topicId, title, description || '', duration || 0, type || req.file.mimetype || 'video', videoUrl]
+    );
+    await conn.commit();
+    res.json({ success: true, message: 'Topic and video uploaded successfully!', topicId, videoUrl });
+  } catch (err) {
+    await conn.rollback();
+    res.status(500).json({ error: 'Failed to create topic and upload video', details: err.message });
+  } finally {
+    conn.release();
+  }
+});
+
+// Admin: Upload video and assign to existing topic/module
 app.post('/admin/upload-module', upload.single('video'), async (req, res) => {
   const { topicId, title, description, duration, type } = req.body;
   if (!req.file || !topicId || !title) {
     return res.status(400).json({ error: 'Missing required fields or video file' });
   }
-  // Accept any video format, store original name and mimetype if needed
   const videoUrl = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`;
   try {
     await pool.query(
@@ -395,18 +422,6 @@ app.delete('/admin/module/:id', async (req, res) => {
     res.json({ success: true, message: 'Module and video deleted.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete module', details: err.message });
-  }
-});
-
-// Admin: Create a new topic
-app.post('/admin/topic', express.json(), async (req, res) => {
-  const { title, description } = req.body;
-  if (!title) return res.status(400).json({ error: 'Title is required' });
-  try {
-    const [result] = await pool.query('INSERT INTO topics (title, description) VALUES (?, ?)', [title, description || '']);
-    res.json({ success: true, id: result.insertId });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create topic', details: err.message });
   }
 });
 

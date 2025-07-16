@@ -9,7 +9,6 @@ import { api } from '../services/api';
 import { deleteModuleById } from '../services/admin';
 import { Video } from 'expo-av';
 import { useRouter } from 'expo-router';
-import { createTopic } from '../services/admin';
 
 export default function AdminContentManagerScreen() {
   // Placeholder state for selected video
@@ -66,26 +65,6 @@ export default function AdminContentManagerScreen() {
       fetchTopics(); // Refresh list
     } catch (error) {
       Toast.show({ type: 'error', text1: 'Upload Failed', text2: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Create a new topic
-  const handleCreateTopic = async () => {
-    if (!newTopicTitle) {
-      Toast.show({ type: 'error', text1: 'Error', text2: 'Topic title is required.' });
-      return;
-    }
-    setLoading(true);
-    try {
-      await createTopic(newTopicTitle, newTopicDesc);
-      Toast.show({ type: 'success', text1: 'Success', text2: 'Topic created successfully!' });
-      setNewTopicTitle('');
-      setNewTopicDesc('');
-      fetchTopics();
-    } catch (error) {
-      Toast.show({ type: 'error', text1: 'Create Failed', text2: error.message });
     } finally {
       setLoading(false);
     }
