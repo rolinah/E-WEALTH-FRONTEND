@@ -93,11 +93,15 @@ export default function ModuleViewerScreen({ route, navigation }) {
         <View style={styles.interactiveSection}>
           <Text style={styles.sectionTitle}>Interactive Exercise</Text>
           <View style={styles.exerciseCard}>
-            <Text style={styles.exerciseText}>
-              {currentStep === 0 && "Let's start with a simple question about financial literacy..."}
-              {currentStep === 1 && "Great! Now let's explore some key concepts..."}
-              {currentStep === 2 && "Final step: Apply what you've learned..."}
-            </Text>
+            {currentStep === 0 && (
+              <Text style={styles.exerciseText}>Let's start with a simple question about financial literacy...</Text>
+            )}
+            {currentStep === 1 && (
+              <Text style={styles.exerciseText}>Great! Now let's explore some key concepts...</Text>
+            )}
+            {currentStep === 2 && (
+              <Text style={styles.exerciseText}>Final step: Apply what you've learned...</Text>
+            )}
           </View>
         </View>
       </View>

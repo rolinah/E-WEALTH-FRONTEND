@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { api } from '../services/api';
 import { Colors } from '../constants/Colors';
 
@@ -28,7 +28,7 @@ export default function TopicListScreen({ navigation }) {
   };
 
   const renderTopicItem = ({ item }) => (
-    <TouchableOpacity
+    <Pressable
       style={styles.topicCard}
       onPress={() => handleTopicPress(item)}
     >
@@ -41,7 +41,7 @@ export default function TopicListScreen({ navigation }) {
         <Text style={styles.statText}>Duration: {item.estimatedHours || 0}h</Text>
         <Text style={styles.statText}>Progress: {item.progress || 0}%</Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 
   if (loading) {

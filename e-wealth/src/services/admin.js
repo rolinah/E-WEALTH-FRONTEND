@@ -24,6 +24,7 @@ export async function createTopicWithVideo(title, description, videoFile, durati
       name: videoFile.name || 'video.mp4',
       type: videoFile.mimeType || 'video/mp4',
     });
+    // Ensure the backend server is running and accessible at http://localhost:3000
     const res = await fetch('http://localhost:3000/admin/create-topic-with-video', {
       method: 'POST',
       body: formData,
