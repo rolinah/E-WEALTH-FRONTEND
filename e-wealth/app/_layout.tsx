@@ -1,6 +1,9 @@
 import { Stack } from 'expo-router';
 import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
+import Toast from 'react-native-toast-message';
+import OnboardingScreen from './onboarding';
+import WelcomeScreen from './welcome';
 
 function AuthGate() {
   const { isAuthenticated, loading } = useAuth();
@@ -17,16 +20,20 @@ function AuthGate() {
     );
   }
 
+  // Only show login/signup if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="auth/login" />
+        <Stack.Screen name="auth/signup" />
+      </Stack>
+    );
+  }
+
+  // Authenticated: show main app tabs (dashboard)
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
-        <Stack.Screen name="(tabs)" />
-      ) : (
-        <>
-          <Stack.Screen name="auth/login" />
-          <Stack.Screen name="auth/signup" />
-        </>
-      )}
+      <Stack.Screen name="(tabs)" />
     </Stack>
   );
 }
@@ -35,6 +42,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AuthGate />
+      <Toast />
     </AuthProvider>
   );
 }
