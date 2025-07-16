@@ -123,6 +123,7 @@ export const AuthProvider = ({ children }) => {
   // Only true if user is a valid object with required fields
   const isAuthenticated = !!(user && user.email && user.role);
   const isAdmin = typeof user?.role === 'string' && user.role.trim().toLowerCase() === 'admin';
+  const needsOnboarding = !!(user && Array.isArray(user.interests) && user.interests.length < 2);
 
   const value = {
     user,
@@ -133,6 +134,7 @@ export const AuthProvider = ({ children }) => {
     getProfile,
     isAuthenticated,
     isAdmin,
+    needsOnboarding,
   };
 
   if (loading) {

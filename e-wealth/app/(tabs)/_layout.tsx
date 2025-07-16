@@ -49,6 +49,7 @@ export default function TabLayout() {
         },
       }}
     >
+      {/* Strict role-based tabs: admin vs user */}
       {isAdmin ? (
         <>
           <Tabs.Screen
@@ -112,6 +113,7 @@ export default function TabLayout() {
           />
         </>
       )}
+      {/* Future: add instructor role, onboarding tab, etc. here */}
     </Tabs>
   );
 }
