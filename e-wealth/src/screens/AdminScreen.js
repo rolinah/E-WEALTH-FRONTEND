@@ -49,7 +49,7 @@ function printCertificate({ userName, moduleName }) {
 }
 
 export default function AdminScreen() {
-  const { signOut, isAdmin, isAuthenticated } = useAuth();
+  const { signOut, isAdmin, isAuthenticated, user } = useAuth();
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -236,6 +236,11 @@ export default function AdminScreen() {
       >
         <Text style={{ fontSize: 32, fontWeight: 'bold', color: Colors.light.accent, letterSpacing: 2, marginBottom: 4 }}>Admin Panel</Text>
         <Text style={{ color: '#fff', fontSize: 16, opacity: 0.8 }}>Manage & Analyze</Text>
+        {/* Admin Role Badge */}
+        <View style={{ marginTop: 12, backgroundColor: '#FFD600', borderRadius: 16, paddingVertical: 6, paddingHorizontal: 18, alignItems: 'center' }}>
+          <Text style={{ color: '#101A3D', fontWeight: 'bold', fontSize: 15 }}>Logged in as: Admin</Text>
+          {user?.email && <Text style={{ color: '#101A3D', fontSize: 13 }}>{user.email}</Text>}
+        </View>
       </LinearGradient>
       <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40, paddingHorizontal: 12 }}>
         {loading && <ActivityIndicator size="large" color={Colors.light.primary} style={{ marginTop: 20 }} />}
