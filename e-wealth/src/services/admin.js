@@ -82,3 +82,24 @@ export async function deleteModuleById(moduleId) {
     throw error;
   }
 } 
+
+// Upload video to existing topic using /upload endpoint
+export async function uploadVideoToTopic(topicId, videoFile) {
+  try {
+    const formData = new FormData();
+    formData.append('topicId', topicId);
+    formData.append('video', {
+      uri: videoFile.uri,
+      name: videoFile.name || 'video.mp4',
+      type: videoFile.mimeType || 'video/mp4',
+    });
+    const res = await fetch('http://localhost:3000/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Upload failed');
+    return await res.json();
+  } catch (error) {
+    throw error;
+  }
+} 

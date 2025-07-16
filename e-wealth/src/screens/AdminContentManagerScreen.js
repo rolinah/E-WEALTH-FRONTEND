@@ -3,7 +3,7 @@
 import React from 'react';
 import { View, Text, Button, TextInput, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { uploadAdminTopicWithVideo } from '../services/admin';
+import { uploadAdminTopicWithVideo, uploadVideoToTopic } from '../services/admin';
 import Toast from 'react-native-toast-message';
 import { api } from '../services/api';
 import { deleteModuleById } from '../services/admin';
@@ -72,15 +72,14 @@ export default function AdminContentManagerScreen() {
   };
 
   // Upload video to selected topic
-  const uploadVideoToTopic = async () => {
+  const uploadVideoToTopicHandler = async () => {
     if (!selectedTopicId || !video) {
       Toast.show({ type: 'error', text1: 'Error', text2: 'Select a topic and a video.' });
       return;
     }
     setLoading(true);
     try {
-      const topic = topics.find(t => t.id == selectedTopicId);
-      const result = await uploadAdminTopicWithVideo(topic.title, topic.description, video, selectedTopicId);
+      const result = await uploadVideoToTopic(selectedTopicId, video);
       Toast.show({ type: 'success', text1: 'Success', text2: result.message || 'Video uploaded successfully!' });
       setVideo(null);
       setSelectedTopicId('');
@@ -163,7 +162,7 @@ export default function AdminContentManagerScreen() {
         )}
         <Button
           title={loading ? 'Uploading...' : 'Upload Video'}
-          onPress={uploadVideoToTopic}
+          onPress={uploadVideoToTopicHandler}
           disabled={!selectedTopicId || !video || loading}
         />
       </View>
