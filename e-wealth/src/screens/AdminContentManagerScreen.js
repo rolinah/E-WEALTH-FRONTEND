@@ -22,6 +22,14 @@ export default function AdminContentManagerScreen() {
   const [loading, setLoading] = React.useState(false);
   const [topics, setTopics] = React.useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [selectedInterest, setSelectedInterest] = React.useState('');
+  const interests = [
+    { label: 'Finance', value: 'Finance' },
+    { label: 'Marketing', value: 'Marketing' },
+    { label: 'Leadership', value: 'Leadership' },
+    { label: 'Management', value: 'Management' },
+    // Add more as needed
+  ];
 
   const router = useRouter();
 
@@ -52,24 +60,33 @@ export default function AdminContentManagerScreen() {
 
   // Handler for uploading the topic and video (new topic)
   const uploadTopic = async () => {
-    if (!newTopicTitle || !newTopicDesc || !video) {
-      Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields and select a video.' });
+    if (!newTopicTitle || !newTopicDesc || !video || !selectedInterest) {
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields, select an interest, and select a video.' });
       return;
     }
     setLoading(true);
     try {
-      // Debug log
-      console.log('Uploading new topic:', { newTopicTitle, newTopicDesc, video });
-      const result = await uploadAdminTopicWithVideo(newTopicTitle, newTopicDesc, {
+      const formData = new FormData();
+      formData.append('title', newTopicTitle);
+      formData.append('description', newTopicDesc);
+      formData.append('interest', selectedInterest);
+      formData.append('video', {
         uri: video.uri,
         name: video.name || 'video.mp4',
         type: video.mimeType || 'video/mp4',
       });
+      const res = await fetch('http://localhost:3000/admin/create-topic-with-video', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Upload failed');
       Toast.show({ type: 'success', text1: 'Success', text2: result.message || 'Topic and video uploaded successfully!' });
       setNewTopicTitle('');
       setNewTopicDesc('');
+      setSelectedInterest('');
       setVideo(null);
-      fetchTopics(); // Refresh list
+      fetchTopics();
     } catch (error) {
       Toast.show({ type: 'error', text1: 'Upload Failed', text2: error.message });
     } finally {
@@ -136,6 +153,16 @@ export default function AdminContentManagerScreen() {
           onChangeText={setNewTopicDesc}
           multiline
         />
+        <Picker
+          selectedValue={selectedInterest}
+          style={{ width: '100%', height: 44, marginBottom: 8 }}
+          onValueChange={(itemValue) => setSelectedInterest(itemValue)}
+        >
+          <Picker.Item label="-- Select Interest --" value="" />
+          {interests.map(interest => (
+            <Picker.Item key={interest.value} label={interest.label} value={interest.value} />
+          ))}
+        </Picker>
         <Button title={loading ? 'Creating...' : 'Create Topic'} onPress={uploadTopic} disabled={loading} />
       </View>
       {/* List of Created Topics */}

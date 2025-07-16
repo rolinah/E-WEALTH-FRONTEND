@@ -357,16 +357,16 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
 // Admin: Create topic and upload video in one step
 app.post('/admin/create-topic-with-video', upload.single('video'), async (req, res) => {
-  const { title, description, duration, type } = req.body;
-  if (!req.file || !title) {
-    return res.status(400).json({ error: 'Missing required fields or video file' });
+  const { title, description, duration, type, interest } = req.body; // add interest
+  if (!req.file || !title || !interest) {
+    return res.status(400).json({ error: 'Missing required fields, interest, or video file' });
   }
   const videoUrl = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`;
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    // Create topic
-    const [topicResult] = await conn.query('INSERT INTO topics (title, description) VALUES (?, ?)', [title, description || '']);
+    // Create topic with interest
+    const [topicResult] = await conn.query('INSERT INTO topics (title, description, interest) VALUES (?, ?, ?)', [title, description || '', interest]);
     const topicId = topicResult.insertId;
     // Create module for the topic
     await conn.query(
