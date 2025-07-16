@@ -5,6 +5,7 @@
     "axios": "^1.10.0",
     "expo-av": "~15.1.7",
     "react-dom": "19.0.0",
+    "react-native-toast-message": "^2.3.3",
     "react-native-web": "^0.20.0",
     "socket.io": "^4.8.1"
   }

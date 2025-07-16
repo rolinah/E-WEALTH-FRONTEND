@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, Swit
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
+import Toast from 'react-native-toast-message';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
@@ -18,36 +19,28 @@ export default function SignUpScreen() {
   const router = useRouter();
 
   const handleSignUp = async () => {
-    setNotification('');
-    setNotificationType('');
     if (!email || !password || !confirmPassword || !name) {
-      setNotification('Please fill in all fields');
-      setNotificationType('error');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields' });
       return;
     }
     if (password !== confirmPassword) {
-      setNotification('Passwords do not match');
-      setNotificationType('error');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Passwords do not match' });
       return;
     }
     if (password.length < 6) {
-      setNotification('Password must be at least 6 characters long');
-      setNotificationType('error');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Password must be at least 6 characters long' });
       return;
     }
     if (isAdmin && !adminSecret) {
-      setNotification('Admin secret is required for admin registration');
-      setNotificationType('error');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Admin secret is required for admin registration' });
       return;
     }
     setLoading(true);
     try {
       await signUp(email, password, { name, role: isAdmin ? 'admin' : 'entrepreneur', adminSecret: isAdmin ? adminSecret : undefined });
-      setNotification('Account created successfully!');
-      setNotificationType('success');
+      Toast.show({ type: 'success', text1: 'Account created', text2: 'Account created successfully!' });
     } catch (error) {
-      setNotification(error.message || 'Sign Up Failed');
-      setNotificationType('error');
+      Toast.show({ type: 'error', text1: 'Sign Up Failed', text2: error.message || 'Sign Up Failed' });
     } finally {
       setLoading(false);
     }
@@ -121,6 +114,7 @@ export default function SignUpScreen() {
           <Text style={styles.link}>Already have an account? Log in</Text>
         </TouchableOpacity>
       </View>
+      <Toast />
     </View>
   );
 }

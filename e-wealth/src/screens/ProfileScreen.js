@@ -6,6 +6,7 @@ import { interests as allInterests } from './InterestsScreen';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
+import Toast from 'react-native-toast-message';
 
 const BADGES = [
   {
@@ -125,6 +126,11 @@ export default function ProfileScreen() {
       setInterestError('');
     } else {
       setInterestError('You can only select up to 2 interests.');
+      Toast.show({
+        type: 'info',
+        text1: 'Warning',
+        text2: 'You can only select up to 2 interests.',
+      });
     }
   };
 
@@ -137,8 +143,18 @@ export default function ProfileScreen() {
       setProfile((prev) => ({ ...prev, interests: editInterests }));
       setEditMode(false);
       setMessage('Profile updated!');
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Profile updated successfully!',
+      });
     } catch (e) {
       setMessage(e.message || 'Failed to update profile');
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: e.message || 'Failed to update profile',
+      });
     } finally {
       setSaving(false);
       setTimeout(() => setMessage(''), 2000);
@@ -285,6 +301,7 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
+      <Toast />
     </ScrollView>
   );
 }

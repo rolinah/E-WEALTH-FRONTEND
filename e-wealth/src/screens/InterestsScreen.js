@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { api } from '../services/api';
 import { useRouter } from 'expo-router';
 import { Colors } from '../constants/Colors';
+import Toast from 'react-native-toast-message';
 
 export const interests = [
   { name: 'Business', color: '#FFD600' }, // yellow
@@ -32,6 +33,7 @@ export default function InterestsScreen() {
       setError('');
     } else {
       setError('You can only select up to 2 interests.');
+      Toast.show({ type: 'info', text1: 'Warning', text2: 'You can only select up to 2 interests.' });
     }
   };
 
@@ -42,10 +44,12 @@ export default function InterestsScreen() {
     try {
       await api.updateProfile({ interests: selected });
       setMessage('Interests saved!');
+      Toast.show({ type: 'success', text1: 'Success', text2: 'Interests saved!' });
       // Optionally, navigate to profile or another screen
       // router.push('/(tabs)/profile');
     } catch (e) {
       setMessage(e.message || 'Failed to save interests');
+      Toast.show({ type: 'error', text1: 'Error', text2: e.message || 'Failed to save interests' });
     } finally {
       setSaving(false);
     }
@@ -87,6 +91,7 @@ export default function InterestsScreen() {
           Selecting your interests helps us tailor content, recommendations, and networking opportunities to your professional goals. You can update your interests anytime in your profile settings.
         </Text>
       </View>
+      <Toast />
     </ScrollView>
   );
 }

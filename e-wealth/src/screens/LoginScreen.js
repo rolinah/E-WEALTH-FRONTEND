@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } fro
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
+import Toast from 'react-native-toast-message';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -19,15 +20,16 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields' });
       return;
     }
     setLoading(true);
     try {
       await signIn(email, password);
+      Toast.show({ type: 'success', text1: 'Login Successful', text2: 'Welcome back!' });
       // Navigation will be handled by AuthContext
     } catch (error) {
-      Alert.alert('Login Failed', error.message);
+      Toast.show({ type: 'error', text1: 'Login Failed', text2: error.message });
     } finally {
       setLoading(false);
     }
@@ -62,6 +64,7 @@ export default function LoginScreen() {
           <Text style={styles.link}>Don't have an account? Sign up</Text>
         </TouchableOpacity>
       </View>
+      <Toast />
     </View>
   );
 }

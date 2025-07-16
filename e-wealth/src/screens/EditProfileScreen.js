@@ -5,6 +5,7 @@ import { Colors } from '../../constants/Colors';
 import { interests as allInterestsRaw } from './InterestsScreen';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import Toast from 'react-native-toast-message';
 
 export default function EditProfileScreen() {
   const [profile, setProfile] = useState(null);
@@ -27,7 +28,7 @@ export default function EditProfileScreen() {
         setEditInterests(Array.isArray(data.interests) ? data.interests : []);
         setAvatar(data.avatar || '');
       } catch (e) {
-        Alert.alert('Error', 'Failed to load profile');
+        Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to load profile' });
       } finally {
         setLoading(false);
       }
@@ -90,10 +91,10 @@ export default function EditProfileScreen() {
     setSaving(true);
     try {
       await api.updateProfile({ name, bio, interests: editInterests, avatar });
-      Alert.alert('Success', 'Profile updated!');
+      Toast.show({ type: 'success', text1: 'Success', text2: 'Profile updated!' });
       router.back();
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update profile');
+      Toast.show({ type: 'error', text1: 'Error', text2: e.message || 'Failed to update profile' });
     } finally {
       setSaving(false);
     }
@@ -158,6 +159,7 @@ export default function EditProfileScreen() {
       >
         <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
       </TouchableOpacity>
+      <Toast />
     </ScrollView>
   );
 }
