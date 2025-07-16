@@ -53,10 +53,10 @@ export default function TabLayout() {
       {isAdmin ? (
         <>
           <Tabs.Screen
-            name="admin"
+            name="admin-analytics"
             options={{
-              title: 'Admin Dashboard',
-              tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+              title: 'Analysis',
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />, // Use a chart icon for analytics
               headerShown: true,
             }}
           />
@@ -64,7 +64,7 @@ export default function TabLayout() {
             name="profile"
             options={{
               title: 'Profile',
-              tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />,
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle" color={color} />, 
               headerShown: true,
             }}
           />

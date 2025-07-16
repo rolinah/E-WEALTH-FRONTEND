@@ -16,7 +16,7 @@ export async function createTopicWithVideo(title, description, videoFile, durati
   try {
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('description', description);
+    formData.append('description', description || '');
     formData.append('duration', duration);
     formData.append('type', type);
     formData.append('video', {
@@ -24,11 +24,14 @@ export async function createTopicWithVideo(title, description, videoFile, durati
       name: videoFile.name || 'video.mp4',
       type: videoFile.mimeType || 'video/mp4',
     });
-    // Ensure the backend server is running and accessible at http://localhost:3000
+    // Debug: log FormData keys/values
+    for (let pair of formData._parts || []) {
+      console.log('[createTopicWithVideo] FormData:', pair[0], pair[1]);
+    }
     const res = await fetch('http://localhost:3000/admin/create-topic-with-video', {
       method: 'POST',
       body: formData,
-      // Do NOT set Content-Type manually! Let the browser set it.
+      // Do NOT set Content-Type manually! Let fetch set it.
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Upload failed');
     return await res.json();
@@ -51,7 +54,7 @@ export async function uploadAdminTopicWithVideo(title, description, videoFile, t
   try {
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('description', description);
+    formData.append('description', description || '');
     formData.append('topicId', topicId);
     formData.append('duration', duration);
     formData.append('type', type);
@@ -60,6 +63,10 @@ export async function uploadAdminTopicWithVideo(title, description, videoFile, t
       name: videoFile.name || 'video.mp4',
       type: videoFile.mimeType || 'video/mp4',
     });
+    // Debug: log FormData keys/values
+    for (let pair of formData._parts || []) {
+      console.log('[uploadAdminTopicWithVideo] FormData:', pair[0], pair[1]);
+    }
     const res = await fetch('http://localhost:3000/admin/upload-module', {
       method: 'POST',
       body: formData,
