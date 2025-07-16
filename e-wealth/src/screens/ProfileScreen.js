@@ -78,7 +78,7 @@ const COMPLETED_MODULES = [
 ];
 
 export default function ProfileScreen() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(true);
   const [notifError, setNotifError] = useState(null);
@@ -205,12 +205,17 @@ export default function ProfileScreen() {
         {COMPLETED_MODULES.map((mod) => (
           <View key={mod.id} style={styles.certificateRow}>
             <Text style={styles.certificateName}>{mod.name}</Text>
-            <TouchableOpacity
-              style={styles.certificateBtn}
-              onPress={() => printCertificate({ userName: profile.name || 'User', moduleName: mod.name })}
-            >
-              <Text style={styles.certificateBtnText}>View/Print Certificate</Text>
-            </TouchableOpacity>
+            {isAdmin && (
+              <TouchableOpacity
+                style={styles.certificateBtn}
+                onPress={() => printCertificate({ userName: profile.name || 'User', moduleName: mod.name })}
+              >
+                <Text style={styles.certificateBtnText}>View/Print Certificate</Text>
+              </TouchableOpacity>
+            )}
+            {!isAdmin && (
+              <Text style={{ color: '#888', fontStyle: 'italic', marginLeft: 8 }}>Only admin can print certificates</Text>
+            )}
           </View>
         ))}
       </View>
