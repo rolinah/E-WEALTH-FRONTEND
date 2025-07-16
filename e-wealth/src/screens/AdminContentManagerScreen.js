@@ -1,27 +1,27 @@
 // AdminContentManagerScreen.js
-// Screen for admins to add/update modules without app updates.
 import React from 'react';
-import { View, Text, Button, TextInput, Alert } from 'react-native';
+import { View, Text, Button, TextInput } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { uploadAdminTopicWithVideo, uploadVideoToTopic } from '../services/admin';
+import { uploadAdminTopicWithVideo, deleteModuleById } from '../services/admin';
 import Toast from 'react-native-toast-message';
 import { api } from '../services/api';
-import { deleteModuleById } from '../services/admin';
 import { Video } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 
 export default function AdminContentManagerScreen() {
-  // Placeholder state for selected video
+  // State for new topic
+  const [newTopicTitle, setNewTopicTitle] = React.useState('');
+  const [newTopicDesc, setNewTopicDesc] = React.useState('');
+  // State for existing topic/module upload
+  const [selectedTopicId, setSelectedTopicId] = React.useState('');
+  const [moduleTitle, setModuleTitle] = React.useState('');
+  const [moduleDesc, setModuleDesc] = React.useState('');
+  // Shared state
   const [video, setVideo] = React.useState(null);
-  const [topicTitle, setTopicTitle] = React.useState('');
-  const [topicDesc, setTopicDesc] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [topics, setTopics] = React.useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [newTopicTitle, setNewTopicTitle] = React.useState('');
-  const [newTopicDesc, setNewTopicDesc] = React.useState('');
-  const [selectedTopicId, setSelectedTopicId] = React.useState('');
 
   const router = useRouter();
 
@@ -45,23 +45,29 @@ export default function AdminContentManagerScreen() {
       type: 'video/*',
       copyToCacheDirectory: true,
     });
-    if (!result.canceled) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setVideo(result.assets[0]);
     }
   };
 
-  // Handler for uploading the topic and video (to be implemented)
+  // Handler for uploading the topic and video (new topic)
   const uploadTopic = async () => {
-    if (!topicTitle || !topicDesc || !video) {
+    if (!newTopicTitle || !newTopicDesc || !video) {
       Toast.show({ type: 'error', text1: 'Error', text2: 'Please fill in all fields and select a video.' });
       return;
     }
     setLoading(true);
     try {
-      const result = await uploadAdminTopicWithVideo(topicTitle, topicDesc, video);
+      // Debug log
+      console.log('Uploading new topic:', { newTopicTitle, newTopicDesc, video });
+      const result = await uploadAdminTopicWithVideo(newTopicTitle, newTopicDesc, {
+        uri: video.uri,
+        name: video.name || 'video.mp4',
+        type: video.mimeType || 'video/mp4',
+      });
       Toast.show({ type: 'success', text1: 'Success', text2: result.message || 'Topic and video uploaded successfully!' });
-      setTopicTitle('');
-      setTopicDesc('');
+      setNewTopicTitle('');
+      setNewTopicDesc('');
       setVideo(null);
       fetchTopics(); // Refresh list
     } catch (error) {
@@ -71,7 +77,7 @@ export default function AdminContentManagerScreen() {
     }
   };
 
-  // Upload video to selected topic
+  // Upload video to selected topic (existing topic)
   const uploadVideoToTopicHandler = async () => {
     if (!selectedTopicId || !video) {
       Toast.show({ type: 'error', text1: 'Error', text2: 'Select a topic and a video.' });
@@ -79,10 +85,18 @@ export default function AdminContentManagerScreen() {
     }
     setLoading(true);
     try {
-      const result = await uploadVideoToTopic(selectedTopicId, video);
+      // Debug log
+      console.log('Uploading video to topic:', { selectedTopicId, video });
+      const result = await uploadAdminTopicWithVideo(moduleTitle, moduleDesc, {
+        uri: video.uri,
+        name: video.name || 'video.mp4',
+        type: video.mimeType || 'video/mp4',
+      }, selectedTopicId);
       Toast.show({ type: 'success', text1: 'Success', text2: result.message || 'Video uploaded successfully!' });
       setVideo(null);
       setSelectedTopicId('');
+      setModuleTitle('');
+      setModuleDesc('');
       fetchTopics();
     } catch (error) {
       Toast.show({ type: 'error', text1: 'Upload Failed', text2: error.message });
@@ -122,7 +136,7 @@ export default function AdminContentManagerScreen() {
           onChangeText={setNewTopicDesc}
           multiline
         />
-        <Button title={loading ? 'Creating...' : 'Create Topic'} onPress={handleCreateTopic} disabled={loading} />
+        <Button title={loading ? 'Creating...' : 'Create Topic'} onPress={uploadTopic} disabled={loading} />
       </View>
       {/* List of Created Topics */}
       <View style={{ width: '100%', maxWidth: 600, backgroundColor: '#e3e3e3', borderRadius: 10, padding: 16, marginBottom: 24 }}>
@@ -155,6 +169,19 @@ export default function AdminContentManagerScreen() {
               <Picker.Item key={topic.id} label={`${topic.title} (ID: ${topic.id})`} value={topic.id} />
             ))}
           </Picker>
+          <TextInput
+            style={{ backgroundColor: '#fff', borderRadius: 8, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#ddd' }}
+            placeholder="Module Title"
+            value={moduleTitle}
+            onChangeText={setModuleTitle}
+          />
+          <TextInput
+            style={{ backgroundColor: '#fff', borderRadius: 8, padding: 12, marginBottom: 8, borderWidth: 1, borderColor: '#ddd', minHeight: 40 }}
+            placeholder="Module Description (optional)"
+            value={moduleDesc}
+            onChangeText={setModuleDesc}
+            multiline
+          />
         </View>
         <Button title="Pick Video" onPress={pickVideo} />
         {video && (
@@ -163,7 +190,7 @@ export default function AdminContentManagerScreen() {
         <Button
           title={loading ? 'Uploading...' : 'Upload Video'}
           onPress={uploadVideoToTopicHandler}
-          disabled={!selectedTopicId || !video || loading}
+          disabled={!selectedTopicId || !video || !moduleTitle || loading}
         />
       </View>
       {/* List of Topics and Videos */}
@@ -203,4 +230,4 @@ export default function AdminContentManagerScreen() {
       </View>
     </View>
   );
-} 
+}
