@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -62,6 +63,13 @@ export default function LoginScreen() {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/auth/signup')}>
           <Text style={styles.link}>Don't have an account? Sign up</Text>
+        </TouchableOpacity>
+        {/* Reset App Button for Debugging */}
+        <TouchableOpacity style={[styles.button, { backgroundColor: '#d32f2f', marginTop: 16 }]} onPress={async () => {
+          await AsyncStorage.clear();
+          Alert.alert('Reset', 'App storage cleared. Restart the app.');
+        }}>
+          <Text style={[styles.buttonText, { color: '#fff' }]}>Reset App (Debug)</Text>
         </TouchableOpacity>
       </View>
       <Toast />

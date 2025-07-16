@@ -16,7 +16,11 @@ interface Progress {
 }
 
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  if (isAdmin) {
+    // Prevent admin from seeing Home tab content
+    return null;
+  }
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
