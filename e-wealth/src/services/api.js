@@ -127,6 +127,22 @@ export const api = {
       ];
     }
   },
+  getTopicById: async (topicId) => {
+    try {
+      const token = await storage.getItem('jwt');
+      const res = await fetch(`${BACKEND_URL}/topics/${topicId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch topic');
+      }
+      return await res.json();
+    } catch (error) {
+      console.error('Error fetching topic:', error);
+      throw error;
+    }
+  },
   getAdminData: async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/admin/stats`);

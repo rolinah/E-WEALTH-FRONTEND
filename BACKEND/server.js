@@ -374,6 +374,42 @@ app.post('/admin/upload-module', upload.single('video'), async (req, res) => {
   }
 });
 
+// Admin: Delete a module/video by ID
+app.delete('/admin/module/:id', async (req, res) => {
+  const moduleId = req.params.id;
+  try {
+    // Get the module to find the video file
+    const [modules] = await pool.query('SELECT video FROM modules WHERE id = ?', [moduleId]);
+    if (!modules.length) return res.status(404).json({ error: 'Module not found' });
+    const videoUrl = modules[0].video;
+    // Remove the video file if it exists in uploads
+    if (videoUrl) {
+      const filename = videoUrl.split('/').pop();
+      const filePath = path.join(__dirname, 'uploads', filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    // Delete the module from the database
+    await pool.query('DELETE FROM modules WHERE id = ?', [moduleId]);
+    res.json({ success: true, message: 'Module and video deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete module', details: err.message });
+  }
+});
+
+// Admin: Create a new topic
+app.post('/admin/topic', express.json(), async (req, res) => {
+  const { title, description } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  try {
+    const [result] = await pool.query('INSERT INTO topics (title, description) VALUES (?, ?)', [title, description || '']);
+    res.json({ success: true, id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create topic', details: err.message });
+  }
+});
+
 // Admin stats endpoint
 app.get('/admin/stats', async (req, res) => {
   try {
